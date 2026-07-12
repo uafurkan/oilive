@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Collection — OILIVE</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+  <meta name="description" content="The OILIVE collection. Single-origin, cold-pressed extra virgin olive oil from the Aegean. First pressing 2026.">
+
+  <meta property="og:title" content="The Collection — OILIVE">
+  <meta property="og:description" content="Single-origin, cold-pressed extra virgin olive oil from the Aegean. First pressing 2026.">
+  <meta property="og:image" content="https://oilive.co/assets/oilive-logo.png">
+  <meta property="og:url" content="https://oilive.co/collection">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OILIVE">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:      #FAFAF7;
+      --bg-alt:  #F2F1EB;
+      --bg-dark: #1A1A1A;
+      --ink:     #1A1A1A;
+      --ink-65:  rgba(26,26,26,0.65);
+      --ink-40:  rgba(26,26,26,0.40);
+      --ink-25:  rgba(26,26,26,0.25);
+      --ink-12:  rgba(26,26,26,0.12);
+      --ink-08:  rgba(26,26,26,0.08);
+      --green:   #556B2F;
+      --green-d: #1F3B1F;
+    }
+    [data-theme="dark"] {
+      --bg:      #0B160B;
+      --bg-alt:  #101E10;
+      --bg-dark: #060E06;
+      --ink:     #FAFAF7;
+      --ink-65:  rgba(250,250,247,0.65);
+      --ink-40:  rgba(250,250,247,0.40);
+      --ink-25:  rgba(250,250,247,0.25);
+      --ink-12:  rgba(250,250,247,0.12);
+      --ink-08:  rgba(250,250,247,0.08);
+      --green:   #7A9B3F;
+      --green-d: #556B2F;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+      transition: background 0.5s, color 0.5s;
+    }
+    a { color: var(--green); text-decoration: none; }
+    ::selection { background: var(--green); color: #FAFAF7; }
+    @media (pointer: coarse) { body { cursor: auto; } #cursor { display: none !important; } }
+
+    /* ─── Cursor (shared with home) ─── */
+    #cursor {
+      position: fixed; top: 0; left: 0;
+      width: 16px; height: 20px;
+      pointer-events: none; z-index: 9999; will-change: transform;
+    }
+    #cursor svg {
+      display: block; overflow: visible;
+      transform-origin: 50% 60%;
+      transition: transform 0.25s cubic-bezier(.2,.8,.3,1);
+    }
+    #cursor.hovering svg { transform: scale(1.4); }
+    #cursor .olive-body { fill: var(--green); transition: fill 0.4s; }
+    #cursor .olive-stem { fill: var(--green-d); transition: fill 0.4s; }
+    #cursor .olive-shine { fill: rgba(255,255,255,0.4); }
+
+    /* ─── Theme toggle (shared with home) ─── */
+    #theme-toggle {
+      position: fixed; top: 28px; right: 28px; z-index: 7000;
+      width: 46px; height: 26px;
+      border: 1px solid var(--ink-25); border-radius: 13px;
+      background: transparent; cursor: pointer; padding: 0;
+      display: flex; align-items: center;
+      transition: border-color 0.3s;
+    }
+    #theme-toggle::after {
+      content: '';
+      display: block; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--ink); margin-left: 3px;
+      transition: transform 0.3s ease, background 0.3s;
+    }
+    [data-theme="dark"] #theme-toggle::after { transform: translateX(20px); background: var(--green); }
+
+    /* ─── Header ─── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 32px clamp(24px, 8vw, 120px);
+    }
+    header img { width: 108px; height: auto; transition: filter 0.4s; }
+    .back-link {
+      font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-65); transition: color 0.2s;
+      margin-right: 76px;
+    }
+    .back-link:hover { color: var(--green); }
+
+    /* ─── Intro ─── */
+    .intro {
+      padding: clamp(60px, 10vh, 120px) clamp(24px, 8vw, 120px) clamp(48px, 8vh, 90px);
+      max-width: 900px;
+    }
+    .kicker {
+      font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--green); font-weight: 600;
+    }
+    .intro h1 {
+      margin: 26px 0 0;
+      font-family: 'Playfair Display', serif;
+      font-weight: 500;
+      font-size: clamp(38px, 5.4vw, 76px);
+      line-height: 1.08; letter-spacing: -0.01em;
+    }
+    .intro p {
+      margin: 30px 0 0;
+      font-size: 16px; line-height: 1.8; color: var(--ink-65);
+      max-width: 52ch; text-wrap: pretty;
+    }
+
+    /* ─── Product grid ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      border-top: 1px solid var(--ink-08);
+    }
+    .card {
+      padding: clamp(40px, 5vw, 72px) clamp(28px, 4vw, 56px) clamp(44px, 5vw, 64px);
+      border-bottom: 1px solid var(--ink-08);
+      display: flex; flex-direction: column; gap: 0;
+      transition: opacity 0.9s ease, transform 0.9s ease, background 0.5s;
+    }
+    .card.pre { opacity: 0; transform: translateY(26px); }
+    .card.pre.in { opacity: 1; transform: none; }
+    .card + .card { border-left: 1px solid var(--ink-08); }
+    @media (max-width: 720px) { .card + .card { border-left: none; } }
+    .card:hover { background: var(--bg-alt); }
+
+    .card-visual {
+      display: flex; align-items: flex-end; justify-content: center;
+      height: 300px; margin-bottom: 44px;
+    }
+    .card-visual svg { display: block; height: 100%; width: auto; }
+    .bottle-glass { fill: #16240D; }
+    [data-theme="dark"] .bottle-glass { fill: #1D2F12; }
+    .bottle-cap { fill: #556B2F; }
+    .bottle-label { fill: #FAFAF7; }
+    .bottle-shine { fill: rgba(250,250,247,0.10); }
+
+    .card-no {
+      font-size: 10px; letter-spacing: 0.3em; color: var(--ink-40);
+      text-transform: uppercase;
+    }
+    .card h2 {
+      margin: 14px 0 0;
+      font-family: 'Playfair Display', serif;
+      font-weight: 500; font-size: 27px; line-height: 1.2;
+    }
+    .card .size {
+      margin-top: 6px;
+      font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--green); font-weight: 600;
+    }
+    .card p {
+      margin: 20px 0 0;
+      font-size: 14.5px; line-height: 1.75; color: var(--ink-65);
+      text-wrap: pretty;
+    }
+    .card dl {
+      margin: 26px 0 0; padding: 18px 0 0;
+      border-top: 1px solid var(--ink-08);
+      display: grid; grid-template-columns: auto 1fr; gap: 7px 18px;
+    }
+    .card dt {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-40); align-self: baseline; padding-top: 2px;
+    }
+    .card dd { margin: 0; font-size: 13px; color: var(--ink); }
+    .card .cta {
+      margin-top: 34px;
+      display: inline-flex; align-items: center; gap: 10px;
+      align-self: flex-start;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ink);
+      border-bottom: 1px solid var(--green);
+      padding-bottom: 6px;
+      transition: color 0.2s;
+    }
+    .card .cta:hover { color: var(--green); }
+    .price-note {
+      margin-top: 12px;
+      font-size: 11px; color: var(--ink-40); letter-spacing: 0.08em;
+    }
+
+    /* ─── Bottom CTA ─── */
+    .bottom-cta {
+      text-align: center;
+      padding: clamp(80px, 14vh, 150px) 24px;
+    }
+    .bottom-cta h3 {
+      margin: 0;
+      font-family: 'Playfair Display', serif; font-weight: 500;
+      font-size: clamp(24px, 3vw, 38px); line-height: 1.25;
+    }
+    .bottom-cta a.button {
+      display: inline-block; margin-top: 36px;
+      background: var(--green); color: #FAFAF7;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 16px 34px;
+      transition: background 0.2s;
+    }
+    .bottom-cta a.button:hover { background: var(--green-d); color: #FAFAF7; }
+
+    /* ─── Footer ─── */
+    footer {
+      border-top: 1px solid var(--ink-08);
+      padding: 48px clamp(24px, 8vw, 120px);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    footer img { width: 92px; height: auto; transition: filter 0.4s; }
+    .footer-link {
+      color: var(--ink); font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor">
+  <svg viewBox="0 0 20 26" width="16" height="20">
+    <rect class="olive-stem" x="8.4" y="0" width="3.2" height="6" rx="1.6"/>
+    <ellipse class="olive-body" cx="10" cy="15.5" rx="8" ry="10"/>
+    <ellipse class="olive-shine" cx="7" cy="10.8" rx="2.2" ry="3"/>
+  </svg>
+</div>
+
+<button id="theme-toggle" aria-label="Toggle dark mode"></button>
+
+<header>
+  <a href="index.html" aria-label="OILIVE home"><img id="header-logo" src="assets/oilive-logo.png" alt="OILIVE"></a>
+  <a class="back-link" href="index.html">&larr; Home</a>
+</header>
+
+<section class="intro">
+  <span class="kicker">The Collection</span>
+  <h1>Three expressions.<br><span style="font-style:italic;color:var(--green);">One grove.</span></h1>
+  <p>Every bottle comes from the same hillside in Muğla, picked and pressed within hours. What changes is the moment we choose to harvest — and what that moment does to the oil.</p>
+</section>
+
+<div class="grid">
+
+  <!-- 01 — Early Harvest -->
+  <article class="card">
+    <div class="card-visual" aria-hidden="true">
+      <svg viewBox="0 0 120 300" style="height:90%;">
+        <rect class="bottle-cap" x="51" y="8" width="18" height="16" rx="2"/>
+        <path class="bottle-glass" d="M53 24 h14 v34 c0 8 14 18 14 34 v186 c0 9 -6 14 -14 14 H53 c-8 0 -14 -5 -14 -14 V92 c0 -16 14 -26 14 -34 z"/>
+        <rect class="bottle-shine" x="46" y="98" width="7" height="180" rx="3.5"/>
+        <rect class="bottle-label" x="43" y="128" width="54" height="70" rx="1"/>
+        <image href="assets/oilive-o-crop.png" x="55" y="140" width="30" height="46" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+    </div>
+    <span class="card-no">No. 01</span>
+    <h2>The First Pressing</h2>
+    <span class="size">500 ml — Early Harvest</span>
+    <p>Memecik olives picked green in late October, pressed within four hours. Vivid, peppery, unapologetically intense — the taste of a harvest that refused to wait.</p>
+    <dl>
+      <dt>Acidity</dt><dd>&lt; 0.3%</dd>
+      <dt>Polyphenols</dt><dd>&gt; 400 mg/kg</dd>
+      <dt>Harvest</dt><dd>October 2025</dd>
+    </dl>
+    <a class="cta" href="index.html#notify">Notify me <span aria-hidden="true">&rarr;</span></a>
+    <span class="price-note">Pricing revealed at launch</span>
+  </article>
+
+  <!-- 02 — Old Grove Reserve -->
+  <article class="card">
+    <div class="card-visual" aria-hidden="true">
+      <svg viewBox="0 0 120 300" style="height:82%;">
+        <rect class="bottle-cap" x="51" y="8" width="18" height="16" rx="2"/>
+        <path class="bottle-glass" d="M53 24 h14 v30 c0 8 16 16 16 32 v190 c0 9 -6 14 -14 14 H51 c-8 0 -14 -5 -14 -14 V86 c0 -16 16 -24 16 -32 z"/>
+        <rect class="bottle-shine" x="44" y="92" width="7" height="186" rx="3.5"/>
+        <rect class="bottle-label" x="42" y="126" width="56" height="74" rx="1"/>
+        <image href="assets/oilive-o-crop.png" x="55" y="139" width="30" height="48" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+    </div>
+    <span class="card-no">No. 02 — Numbered bottles</span>
+    <h2>The Old Grove</h2>
+    <span class="size">250 ml — Limited Reserve</span>
+    <p>A single day's pressing from our oldest trees — some past their hundredth year. Deeper, quieter, almost meditative. Each bottle is numbered by hand.</p>
+    <dl>
+      <dt>Acidity</dt><dd>&lt; 0.25%</dd>
+      <dt>Trees</dt><dd>100+ years old</dd>
+      <dt>Bottles</dt><dd>Limited run</dd>
+    </dl>
+    <a class="cta" href="index.html#notify">Notify me <span aria-hidden="true">&rarr;</span></a>
+    <span class="price-note">Pricing revealed at launch</span>
+  </article>
+
+  <!-- 03 — The Table -->
+  <article class="card">
+    <div class="card-visual" aria-hidden="true">
+      <svg viewBox="0 0 120 300" style="height:100%;">
+        <rect class="bottle-cap" x="51" y="8" width="18" height="16" rx="2"/>
+        <path class="bottle-glass" d="M53 24 h14 v38 c0 8 18 18 18 34 v182 c0 9 -6 14 -14 14 H49 c-8 0 -14 -5 -14 -14 V96 c0 -16 18 -26 18 -34 z"/>
+        <rect class="bottle-shine" x="42" y="102" width="7" height="176" rx="3.5"/>
+        <rect class="bottle-label" x="41" y="132" width="58" height="72" rx="1"/>
+        <image href="assets/oilive-o-crop.png" x="55" y="144" width="30" height="47" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+    </div>
+    <span class="card-no">No. 03</span>
+    <h2>The Table</h2>
+    <span class="size">750 ml — Everyday Pressing</span>
+    <p>The same grove, the generous format. Made for kitchens where olive oil isn't an ingredient but a habit — finishing, frying, and everything between.</p>
+    <dl>
+      <dt>Acidity</dt><dd>&lt; 0.4%</dd>
+      <dt>Profile</dt><dd>Smooth, ripe fruit</dd>
+      <dt>Format</dt><dd>Dark glass, 750 ml</dd>
+    </dl>
+    <a class="cta" href="index.html#notify">Notify me <span aria-hidden="true">&rarr;</span></a>
+    <span class="price-note">Pricing revealed at launch</span>
+  </article>
+
+</div>
+
+<section class="bottom-cta">
+  <h3>The first pressing arrives in 2026.<br><span style="font-style:italic;color:var(--green);">Be there when it does.</span></h3>
+  <a class="button" href="index.html#notify">Join the list</a>
+</section>
+
+<footer>
+  <img id="footer-logo" src="assets/oilive-logo.png" alt="OILIVE">
+  <div style="display:flex;gap:28px;">
+    <a href="https://www.instagram.com/oilive.co" target="_blank" rel="noopener" class="footer-link">Instagram</a>
+    <a href="https://www.facebook.com/profile.php?id=61591957916677" target="_blank" rel="noopener" class="footer-link">Facebook</a>
+    <a href="mailto:hello@oilive.co" class="footer-link">Contact</a>
+  </div>
+  <span style="font-size:11px;color:var(--ink-40);letter-spacing:0.08em;">© 2026 OILIVE. All rights reserved.</span>
+</footer>
+
+<script>
+(function () {
+  /* Theme (shared localStorage key with home page) */
+  var html = document.documentElement;
+  var toggleBtn = document.getElementById('theme-toggle');
+  var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
+  var logos = [document.getElementById('header-logo'), document.getElementById('footer-logo')];
+  function applyTheme(t) {
+    html.setAttribute('data-theme', t);
+    logos.forEach(function (l) { if (l) l.style.filter = t === 'dark' ? logoDarkFilter : ''; });
+  }
+  applyTheme(localStorage.getItem('oilive-theme') || 'light');
+  toggleBtn.addEventListener('click', function () {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('oilive-theme', next);
+    applyTheme(next);
+  });
+
+  /* Cursor */
+  var cursor = document.getElementById('cursor');
+  var cx = -100, cy = -100, tx = -100, ty = -100;
+  document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
+  (function animCursor() {
+    requestAnimationFrame(animCursor);
+    cx += (tx - cx) * 0.16;
+    cy += (ty - cy) * 0.16;
+    cursor.style.transform = 'translate(' + (cx - cursor.offsetWidth / 2) + 'px,' + (cy - cursor.offsetHeight / 2) + 'px)';
+  })();
+  document.querySelectorAll('a, button').forEach(function (el) {
+    el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
+    el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
+  });
+
+  /* Card reveal */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.card').forEach(function (c, i) {
+    c.classList.add('pre');
+    c.style.transitionDelay = (i * 0.12) + 's';
+    io.observe(c);
+  });
+})();
+</script>
+
+</body>
+</html>

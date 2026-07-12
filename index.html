@@ -391,15 +391,7 @@
 ══════════════════════════════ -->
 <section class="sec-dark" data-screen-label="Product" style="position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:center;gap:64px;padding:120px clamp(24px,8vw,120px);">
   <div style="display:flex;justify-content:center;">
-    <svg id="bottle-svg" data-bottle width="180" height="480" viewBox="0 0 180 480" style="overflow:visible;max-width:38vw;height:auto;transform-style:preserve-3d;">
-      <rect x="74" y="0" width="32" height="26" rx="4" fill="#556B2F"/>
-      <rect x="70" y="26" width="40" height="90" rx="10" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"/>
-      <path d="M70 116 C70 150,20 160,20 210 L20 456 C20 469,31 480,44 480 L136 480 C149 480,160 469,160 456 L160 210 C160 160,110 150,110 116 Z" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"/>
-      <rect x="42" y="260" width="96" height="130" rx="2" fill="#FAFAF7"/>
-      <image href="assets/oilive-o.png" x="67" y="272" width="46" height="78.7"/>
-      <rect x="62" y="362" width="56" height="3" fill="#1A1A1A"/>
-      <rect x="72" y="372" width="36" height="2" fill="rgba(26,26,26,0.4)"/>
-    </svg>
+    <canvas id="bottle-canvas" data-bottle data-reveal style="width:100%;max-width:320px;aspect-ratio:180/480;"></canvas>
   </div>
   <div style="display:flex;flex-direction:column;gap:40px;max-width:480px;">
     <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#556B2F;font-weight:600;">First Pressing — 2026</span>
@@ -518,7 +510,7 @@
     cy += (ty - cy) * 0.16;
     cursor.style.transform = 'translate(' + (cx - cursor.offsetWidth / 2) + 'px,' + (cy - cursor.offsetHeight / 2) + 'px)';
   })();
-  var hoverTargets = document.querySelectorAll('a, button, input, #bottle-svg');
+  var hoverTargets = document.querySelectorAll('a, button, input, #bottle-canvas');
   hoverTargets.forEach(function (el) {
     el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
     el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
@@ -569,12 +561,13 @@
   /* ══════════════════════════════
      WAIT FOR LIBS
   ══════════════════════════════ */
-  var _isMobile, _basePos, _scroll, _renderer, _three;
+  var _isMobile, _basePos, _scroll, _renderer, _three, _bottle3D;
 
   function waitLibs() {
     if (window.THREE && window.gsap && window.ScrollTrigger) {
       initLenis();
       try { initThree(); } catch (err) { console.warn('3D disabled:', err); }
+      try { initBottle3D(); } catch (err) { console.warn('Bottle 3D disabled:', err); }
       try { initScroll(); } catch (err) { console.warn('Scroll disabled:', err); }
     } else {
       setTimeout(waitLibs, 120);
@@ -694,6 +687,117 @@
   }
 
   /* ══════════════════════════════
+     BOTTLE — real 3D glass bottle (Three.js)
+  ══════════════════════════════ */
+  function initBottle3D() {
+    var THREE = window.THREE;
+    var canvas = document.getElementById('bottle-canvas');
+    if (!canvas || !THREE.PMREMGenerator) return;
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(26, 1, 0.1, 20);
+    camera.position.set(0, 0.05, 6.4);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    var key = new THREE.DirectionalLight(0xfff2d8, 1.3);
+    key.position.set(2.5, 4, 5); scene.add(key);
+    var rim = new THREE.DirectionalLight(0x9db87a, 0.9);
+    rim.position.set(-3, 1, -4); scene.add(rim);
+    var fillLight = new THREE.PointLight(0x6b8e4e, 0.7);
+    fillLight.position.set(-1.6, -0.8, 3); scene.add(fillLight);
+
+    /* Fake studio environment so the glass actually reflects something */
+    var pmrem = new THREE.PMREMGenerator(renderer);
+    var envCanvas = document.createElement('canvas');
+    envCanvas.width = 8; envCanvas.height = 256;
+    var ectx = envCanvas.getContext('2d');
+    var grad = ectx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#f4f3ec');
+    grad.addColorStop(0.45, '#cdd6b4');
+    grad.addColorStop(0.55, '#39481f');
+    grad.addColorStop(1, '#050a03');
+    ectx.fillStyle = grad; ectx.fillRect(0, 0, 8, 256);
+    var envTex = new THREE.CanvasTexture(envCanvas);
+    envTex.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = pmrem.fromEquirectangular(envTex).texture;
+    envTex.dispose(); pmrem.dispose();
+
+    /* Bottle silhouette (radius, height) revolved into a lathe */
+    var pts = [
+      new THREE.Vector2(0.00, 0.00),
+      new THREE.Vector2(0.62, 0.02),
+      new THREE.Vector2(0.70, 0.10),
+      new THREE.Vector2(0.72, 1.55),
+      new THREE.Vector2(0.68, 1.72),
+      new THREE.Vector2(0.50, 1.92),
+      new THREE.Vector2(0.27, 2.15),
+      new THREE.Vector2(0.22, 2.35),
+      new THREE.Vector2(0.20, 2.75),
+      new THREE.Vector2(0.24, 2.82),
+      new THREE.Vector2(0.24, 2.86),
+      new THREE.Vector2(0.00, 2.86)
+    ];
+    var bodyGeo = new THREE.LatheGeometry(pts, 56);
+    var glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x0d1608, roughness: 0.1, metalness: 0.0,
+      clearcoat: 1, clearcoatRoughness: 0.08,
+      transmission: 0.6, thickness: 1.3, ior: 1.45,
+      envMapIntensity: 1.15
+    });
+    var body = new THREE.Mesh(bodyGeo, glassMat);
+
+    var capMat = new THREE.MeshStandardMaterial({ color: 0x556B2F, roughness: 0.4, metalness: 0.15, envMapIntensity: 0.8 });
+    var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.235, 0.2, 0.22, 32), capMat);
+    cap.position.y = 2.97;
+
+    var labelBg = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.86, 1.05),
+      new THREE.MeshStandardMaterial({ color: 0xFAFAF7, roughness: 0.75 })
+    );
+    labelBg.position.set(0, 1.15, 0.715);
+
+    var labelTex = new THREE.TextureLoader().load('assets/oilive-o.png');
+    if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
+    var labelImg = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.5, 0.82),
+      new THREE.MeshStandardMaterial({ map: labelTex, transparent: true, roughness: 0.6 })
+    );
+    labelImg.position.set(0, 1.15, 0.722);
+
+    var group = new THREE.Group();
+    group.add(body, cap, labelBg, labelImg);
+    group.position.y = -1.5;
+    scene.add(group);
+
+    function resize() {
+      var w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    var tilt = { sway: -0.1 };
+    var mx = 0, my = 0;
+    (function tick() {
+      requestAnimationFrame(tick);
+      mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
+      my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
+      group.rotation.y = 0.4 + mx * 0.55;
+      group.rotation.x = -my * 0.22;
+      group.rotation.z = tilt.sway;
+      renderer.render(scene, camera);
+    })();
+
+    _bottle3D = { group: group, tilt: tilt };
+  }
+
+  /* ══════════════════════════════
      GSAP SCROLL ANIMATIONS
   ══════════════════════════════ */
   function initScroll() {
@@ -758,28 +862,12 @@
       });
     });
 
-    /* Bottle scroll parallax */
-    gsap.fromTo('#bottle-svg', { rotation:-6, y:40 }, {
-      rotation:3, y:-20, ease:'none',
-      scrollTrigger: { trigger:"[data-screen-label='Product']", start:'top bottom', end:'bottom top', scrub:1 }
-    });
-
-    /* Bottle mouse parallax (desktop only) */
-    if (!_isMobile) {
-      var bottleSvg = document.getElementById('bottle-svg');
-      var productSec = document.querySelector("[data-screen-label='Product']");
-      if (bottleSvg && productSec) {
-        gsap.ticker.add(function () {
-          var rect = productSec.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
-            gsap.to(bottleSvg, {
-              rotateY: mouseNX * 20,
-              rotateX: -mouseNY * 12,
-              duration: 1.4, ease:'power2.out', overwrite:'auto'
-            });
-          }
-        });
-      }
+    /* Bottle scroll parallax (drives the Three.js bottle's sway) */
+    if (_bottle3D) {
+      gsap.fromTo(_bottle3D.tilt, { sway: -0.1 }, {
+        sway: 0.05, ease:'none',
+        scrollTrigger: { trigger:"[data-screen-label='Product']", start:'top bottom', end:'bottom top', scrub:1 }
+      });
     }
 
     /* Press logos stagger */

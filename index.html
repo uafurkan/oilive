@@ -120,6 +120,24 @@
       to   { opacity: 1; transform: none; }
     }
 
+    /* ─── Collection nav link ─── */
+    #collection-nav {
+      position: fixed;
+      top: 32px; left: 28px;
+      z-index: 7000;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.75;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    #collection-nav:hover { opacity: 1; color: var(--green); }
+    @media (max-width: 560px) {
+      #collection-nav { top: 34px; left: 20px; font-size: 10px; letter-spacing: 0.15em; }
+    }
+
     /* ─── Dark mode toggle ─── */
     #theme-toggle {
       position: fixed;
@@ -343,6 +361,7 @@
 </div>
 
 <!-- Dark mode toggle -->
+<a id="collection-nav" href="collection.html">Collection</a>
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <!-- Three.js canvas (fixed, behind everything) -->

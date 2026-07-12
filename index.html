@@ -639,15 +639,18 @@
         loader.classList.add('out');
 
         function settle() {
-          loaderLogo.style.opacity = '0';
-          loaderLogo.style.pointerEvents = 'none';
-          heroLogo.style.transition = 'opacity 0.18s ease';
+          /* Instant, transition-less swap: fading either logo in/out over
+             time would pass through a washed-out/translucent look against
+             the light background. Both flips happen in the same frame so
+             there is nothing in between to see. (heroLogo's own transition
+             is left alone — it only covers the dark-mode filter, not opacity,
+             so this assignment is already instant.) */
           heroLogo.style.transform = 'none';
           heroLogo.style.opacity = '1';
-          setTimeout(function () {
-            loader.style.display = 'none';
-            if (loaderLogo.parentNode) loaderLogo.parentNode.removeChild(loaderLogo);
-          }, 200);
+          loaderLogo.style.opacity = '0';
+          loaderLogo.style.pointerEvents = 'none';
+          loader.style.display = 'none';
+          if (loaderLogo.parentNode) loaderLogo.parentNode.removeChild(loaderLogo);
         }
 
         if (window.gsap) {

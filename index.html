@@ -73,6 +73,7 @@
     ::selection { background: var(--green); color: #FAFAF7; }
     input::placeholder { color: var(--ink-40); }
     @media (pointer: coarse) { body { cursor: auto; } #cursor { display: none !important; } }
+    @media (max-width: 720px) { #bottle-canvas { max-width: 140px; } }
 
     /* ─── Cursor ─── */
     #cursor {
@@ -391,7 +392,7 @@
 ══════════════════════════════ -->
 <section class="sec-dark" data-screen-label="Product" style="position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:center;gap:64px;padding:120px clamp(24px,8vw,120px);">
   <div style="display:flex;justify-content:center;">
-    <canvas id="bottle-canvas" data-bottle data-reveal style="width:100%;max-width:320px;aspect-ratio:180/480;"></canvas>
+    <canvas id="bottle-canvas" data-bottle data-reveal style="width:100%;max-width:220px;aspect-ratio:180/480;"></canvas>
   </div>
   <div style="display:flex;flex-direction:column;gap:40px;max-width:480px;">
     <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#556B2F;font-weight:600;">First Pressing — 2026</span>
@@ -698,8 +699,8 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(26, 1, 0.1, 20);
-    camera.position.set(0, 0.05, 6.4);
+    var camera = new THREE.PerspectiveCamera(24, 1, 0.1, 20);
+    camera.position.set(0, 0.05, 8.2);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.45));
     var key = new THREE.DirectionalLight(0xfff2d8, 1.3);

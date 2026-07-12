@@ -123,7 +123,7 @@
 
   <div id="notify-form-wrap" data-reveal>
     <form id="notify-form" style="display:flex; gap:0; width:min(440px, 90vw); border-bottom:1px solid rgba(26,26,26,0.25);">
-      <input id="notify-email" type="email" required placeholder="Your email address" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:'Instrument Sans', sans-serif; font-size:15px; padding:14px 0; color:#1A1A1A;">
+      <input id="notify-email" type="email" placeholder="Your email address" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:'Instrument Sans', sans-serif; font-size:15px; padding:14px 0; color:#1A1A1A;">
       <button type="submit" style="border:none; cursor:pointer; background:#556B2F; color:#FAFAF7; font-family:'Instrument Sans', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:0 26px; margin:6px 0; transition:background 0.2s;">Notify Me</button>
     </form>
   </div>
@@ -150,7 +150,14 @@
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var email = document.getElementById('notify-email').value;
+      var emailInput = document.getElementById('notify-email');
+      var email = emailInput.value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailInput.style.borderBottom = '1px solid #c0392b';
+        emailInput.placeholder = 'Please enter a valid email address';
+        setTimeout(function () { emailInput.style.borderBottom = ''; emailInput.placeholder = 'Your email address'; }, 2800);
+        return;
+      }
       if (email) {
         formWrap.style.display = 'none';
         thanks.style.display = 'block';

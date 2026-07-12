@@ -83,18 +83,18 @@
     #theme-toggle {
       position: fixed; top: 28px; right: 28px; z-index: 7000;
       width: 46px; height: 26px;
-      border: 1px solid var(--ink-25); border-radius: 13px;
+      border: 1px solid rgba(255,255,255,0.55); border-radius: 13px;
       background: transparent; cursor: pointer; padding: 0;
       display: flex; align-items: center;
-      transition: border-color 0.3s;
+      mix-blend-mode: difference;
     }
     #theme-toggle::after {
       content: '';
       display: block; width: 18px; height: 18px; border-radius: 50%;
-      background: var(--ink); margin-left: 3px;
-      transition: transform 0.3s ease, background 0.3s;
+      background: #fff; margin-left: 3px;
+      transition: transform 0.3s ease;
     }
-    [data-theme="dark"] #theme-toggle::after { transform: translateX(20px); background: var(--green); }
+    [data-theme="dark"] #theme-toggle::after { transform: translateX(20px); }
 
     /* ─── Header ─── */
     header {

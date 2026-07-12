@@ -138,17 +138,22 @@
       #collection-nav { top: 34px; left: 20px; font-size: 10px; letter-spacing: 0.15em; }
     }
 
-    /* ─── Mini header logo (appears on scroll) ─── */
+    /* ─── Mini header logo (appears on scroll) ───
+       Two stacked layers: the green O renders normally, while the
+       "ilive" letters are pure white with mix-blend-mode:difference,
+       so they read black over light sections and white over dark
+       ones — adapting pixel by pixel to whatever is underneath. */
     #mini-logo {
       position: fixed;
       top: 20px; left: 50%;
       width: 84px;
+      aspect-ratio: 600 / 334;
       margin-left: -42px;
       z-index: 6500;
       opacity: 0;
       transform: translateY(-14px) scale(0.85);
       pointer-events: none;
-      transition: opacity 0.45s ease, transform 0.45s ease, filter 0.4s;
+      transition: opacity 0.45s ease, transform 0.45s ease;
       will-change: transform, opacity;
     }
     #mini-logo.on {
@@ -156,6 +161,12 @@
       transform: none;
       pointer-events: auto;
     }
+    #mini-logo img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      display: block;
+    }
+    #mini-logo .adaptive-letters { mix-blend-mode: difference; }
     @media (max-width: 560px) { #mini-logo { width: 72px; margin-left: -36px; top: 22px; } }
 
     /* ─── Dark mode toggle ─── */
@@ -382,7 +393,10 @@
 
 <!-- Dark mode toggle -->
 <a id="collection-nav" href="collection.html">Collection</a>
-<img id="mini-logo" src="assets/oilive-logo.png" alt="OILIVE">
+<div id="mini-logo" aria-label="OILIVE" role="img">
+  <img class="adaptive-letters" src="assets/logo-layer-letters.png" alt="">
+  <img src="assets/logo-layer-o.png" alt="">
+</div>
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <!-- Three.js canvas (fixed, behind everything) -->
@@ -723,14 +737,17 @@
   var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   var saved = localStorage.getItem('oilive-theme') || 'light';
   html.setAttribute('data-theme', saved);
-  [footerLogo, heroLogo, loaderLogo, miniLogo].forEach(function (l) {
+  /* mini logo is excluded: its letters adapt to the backdrop via
+     mix-blend-mode, so no theme filter is needed (and it would
+     break the blend and the green O). */
+  [footerLogo, heroLogo, loaderLogo].forEach(function (l) {
     if (l) l.style.filter = saved === 'dark' ? logoDarkFilter : '';
   });
   toggleBtn.addEventListener('click', function () {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('oilive-theme', next);
-    [footerLogo, heroLogo, loaderLogo, miniLogo].forEach(function (l) {
+    [footerLogo, heroLogo, loaderLogo].forEach(function (l) {
       if (l) l.style.filter = next === 'dark' ? logoDarkFilter : '';
     });
   });

@@ -762,19 +762,19 @@
     );
     labelBg.position.set(0, 1.15, 0.715);
 
-    var labelTex = new THREE.TextureLoader().load('assets/oilive-o-crop.png');
+    var labelTex = new THREE.TextureLoader().load('assets/favicon.png');
     if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
     labelTex.generateMipmaps = false;
     labelTex.minFilter = THREE.LinearFilter;
     labelTex.magFilter = THREE.LinearFilter;
     var labelImg = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.4, 0.745),
+      new THREE.PlaneGeometry(0.52, 0.52),
       new THREE.MeshStandardMaterial({
         map: labelTex, transparent: true, alphaTest: 0.35,
         depthWrite: true, roughness: 0.6
       })
     );
-    labelImg.position.set(0, 1.15, 0.723);
+    labelImg.position.set(0, 1.2, 0.723);
 
     var group = new THREE.Group();
     group.add(body, cap, labelBg, labelImg);

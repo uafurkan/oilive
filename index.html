@@ -93,9 +93,27 @@
       transition: transform 0.25s cubic-bezier(.2,.8,.3,1);
     }
     #cursor.hovering svg { transform: scale(1.4); }
+    #cursor.pressed svg { transform: scale(0.7,1.2); }
+    #cursor.hovering.pressed svg { transform: scale(1.05,1.3); }
     #cursor .olive-body { fill: var(--green); transition: fill 0.4s; }
     #cursor .olive-stem { fill: var(--green-d); transition: fill 0.4s; }
     #cursor .olive-shine { fill: rgba(255,255,255,0.4); }
+
+    /* ─── Drop transition (Hero → Story) ─── */
+    #drop-transition {
+      position: fixed;
+      left: 50%; top: 42%;
+      width: 90px; height: 120px;
+      margin-left: -45px; margin-top: -60px;
+      border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+      background: radial-gradient(circle at 32% 28%, #8CAF52, #556B2F 58%, #1F3B1F 100%);
+      opacity: 0;
+      transform: scale(0) translateY(-60px);
+      filter: blur(1px);
+      z-index: 1;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
 
     /* ─── Loader ─── */
     #loader {
@@ -279,6 +297,7 @@
 
 <!-- Three.js canvas (fixed, behind everything) -->
 <canvas id="oilive-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+<div id="drop-transition" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════
      A. HERO
@@ -304,9 +323,9 @@
   <div style="display:flex;flex-direction:column;gap:40px;max-width:560px;">
     <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;">The Philosophy</span>
     <h2 style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(36px,4.6vw,68px);line-height:1.12;letter-spacing:-0.01em;color:var(--ink);">
-      <span data-reveal style="display:block;">Cold-pressed.</span>
-      <span data-reveal style="display:block;">Small batch.</span>
-      <span data-reveal style="display:block;font-style:italic;color:var(--green);">No compromise.</span>
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;">Cold-pressed.</span></div>
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;">Small batch.</span></div>
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;font-style:italic;color:var(--green);">No compromise.</span></div>
     </h2>
     <p data-reveal style="margin:0;font-size:16px;line-height:1.8;color:var(--ink-65);max-width:42ch;text-wrap:pretty;">One grove. One harvest. Pressed within hours of picking, never blended, never rushed. We make less so that every drop means more.</p>
   </div>
@@ -353,6 +372,10 @@
       <!-- Compass -->
       <text x="352" y="28" font-family="'Instrument Sans',sans-serif" font-size="11" fill="var(--ink-40)" text-anchor="middle">N</text>
       <line x1="352" y1="32" x2="352" y2="46" stroke="var(--ink-40)" stroke-width="1"/>
+      <!-- Route to New York -->
+      <path id="route-path" d="M120 286 C 190 250, 250 160, 366 62" stroke="var(--green)" stroke-width="1.3" fill="none" stroke-linecap="round" opacity="0.8"/>
+      <circle id="route-end-dot" cx="366" cy="62" r="3.5" fill="var(--green)" opacity="0"/>
+      <text id="route-label" x="358" y="50" font-family="'Instrument Sans',sans-serif" font-size="10" fill="var(--green)" text-anchor="end" letter-spacing="0.12em" opacity="0">NEW YORK</text>
     </svg>
   </div>
 </section>
@@ -398,15 +421,19 @@
   </div>
   <div style="display:flex;flex-direction:column;gap:40px;max-width:480px;">
     <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#556B2F;font-weight:600;">First Pressing — 2026</span>
-    <h2 data-reveal style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(32px,4vw,56px);line-height:1.15;letter-spacing:-0.01em;color:#FAFAF7;">One harvest.<br>One pressing.<br>Worth the wait.</h2>
+    <h2 style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(32px,4vw,56px);line-height:1.15;letter-spacing:-0.01em;color:#FAFAF7;">
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;">One harvest.</span></div>
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;">One pressing.</span></div>
+      <div style="overflow:hidden;"><span data-reveal-line style="display:block;">Worth the wait.</span></div>
+    </h2>
     <p data-reveal style="margin:0;font-size:16px;line-height:1.8;color:rgba(250,250,247,0.6);text-wrap:pretty;">Dark glass to protect what light would ruin. A label that says only what matters. The rest is in the bottle.</p>
     <div class="specs-row" data-reveal>
       <div class="spec-item">
-        <span class="spec-value">&gt;400</span>
+        <span class="spec-value" data-count data-count-to="400" data-count-prefix="&gt;">0</span>
         <span class="spec-label">mg/kg Polyphenols</span>
       </div>
       <div class="spec-item">
-        <span class="spec-value">&lt;0.3%</span>
+        <span class="spec-value" data-count data-count-to="0.3" data-count-decimals="1" data-count-prefix="&lt;" data-count-suffix="%">0</span>
         <span class="spec-label">Free Acidity</span>
       </div>
       <div class="spec-item">
@@ -414,7 +441,7 @@
         <span class="spec-label">Harvest Date</span>
       </div>
     </div>
-    <a data-reveal href="collection.html" style="display:inline-flex;align-items:center;gap:12px;align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#FAFAF7;border-bottom:1px solid var(--green);padding-bottom:8px;transition:color 0.2s;" onmouseover="this.style.color='#7A9B3F'" onmouseout="this.style.color='#FAFAF7'">Explore the Collection <span aria-hidden="true">&rarr;</span></a>
+    <a data-reveal data-magnetic href="collection.html" style="display:inline-flex;align-items:center;gap:12px;align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#FAFAF7;border-bottom:1px solid var(--green);padding-bottom:8px;transition:color 0.2s;" onmouseover="this.style.color='#7A9B3F'" onmouseout="this.style.color='#FAFAF7'">Explore the Collection <span aria-hidden="true">&rarr;</span></a>
   </div>
 </section>
 
@@ -441,7 +468,7 @@
   <div id="notify-form-wrap" data-reveal>
     <form id="notify-form" style="display:flex;gap:0;width:min(440px,90vw);border-bottom:1px solid var(--ink-25);">
       <input id="notify-email" type="email" placeholder="Your email address">
-      <button id="notify-btn" type="submit">Notify Me</button>
+      <button id="notify-btn" data-magnetic type="submit">Notify Me</button>
     </form>
   </div>
   <p id="notify-thanks" style="display:none;margin:0;font-size:15px;color:var(--green);letter-spacing:0.06em;">Thank you. You're on the list.</p>
@@ -519,6 +546,25 @@
   hoverTargets.forEach(function (el) {
     el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
     el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
+  });
+  document.addEventListener('mousedown', function () { cursor.classList.add('pressed'); });
+  document.addEventListener('mouseup', function () { cursor.classList.remove('pressed'); });
+
+  /* ══════════════════════════════
+     MAGNETIC BUTTONS
+  ══════════════════════════════ */
+  document.querySelectorAll('[data-magnetic]').forEach(function (btn) {
+    btn.addEventListener('mousemove', function (e) {
+      var r = btn.getBoundingClientRect();
+      var mx = e.clientX - (r.left + r.width / 2);
+      var my = e.clientY - (r.top + r.height / 2);
+      if (window.gsap) {
+        gsap.to(btn, { x: mx * 0.35, y: my * 0.35, duration: 0.4, ease: 'power2.out' });
+      }
+    });
+    btn.addEventListener('mouseleave', function () {
+      if (window.gsap) gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' });
+    });
   });
 
   /* ══════════════════════════════
@@ -841,6 +887,62 @@
         scrollTrigger: { trigger:el, start:'top 85%' }
       });
     });
+
+    /* Masked line reveal for headlines */
+    gsap.set('[data-reveal-line]', { yPercent: 110 });
+    document.querySelectorAll('h2').forEach(function (h2) {
+      var lines = h2.querySelectorAll('[data-reveal-line]');
+      if (!lines.length) return;
+      gsap.to(lines, {
+        yPercent: 0, duration: 0.9, stagger: 0.09, ease: 'power3.out',
+        scrollTrigger: { trigger: h2, start: 'top 85%' }
+      });
+    });
+
+    /* Counting numbers (specs) */
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      var to = parseFloat(el.getAttribute('data-count-to'));
+      var decimals = parseInt(el.getAttribute('data-count-decimals') || '0', 10);
+      var prefix = el.getAttribute('data-count-prefix') || '';
+      var suffix = el.getAttribute('data-count-suffix') || '';
+      var obj = { v: 0 };
+      window.ScrollTrigger.create({
+        trigger: el, start: 'top 88%', once: true,
+        onEnter: function () {
+          gsap.to(obj, {
+            v: to, duration: 1.5, ease: 'power2.out',
+            onUpdate: function () { el.textContent = prefix + obj.v.toFixed(decimals) + suffix; }
+          });
+        }
+      });
+    });
+
+    /* Drop transition — Hero → Story */
+    var dropTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "[data-screen-label='Hero']", start: '55% top',
+        endTrigger: "[data-screen-label='Story']", end: '35% top',
+        scrub: 1
+      }
+    });
+    dropTl
+      .fromTo('#drop-transition', { opacity:0, scale:0, y:-60 }, { opacity:0.9, scale:1, y:0, ease:'power1.out' })
+      .to('#drop-transition', { opacity:0, scale:1.7, y:70, ease:'power1.in' }, '>-0.05');
+
+    /* Origin map — route to New York */
+    var routePath = document.getElementById('route-path');
+    if (routePath) {
+      var routeLen = routePath.getTotalLength();
+      routePath.style.strokeDasharray = routeLen;
+      routePath.style.strokeDashoffset = routeLen;
+      var routeTl = gsap.timeline({
+        scrollTrigger: { trigger: "[data-screen-label='Origin']", start: 'top 55%' }
+      });
+      routeTl
+        .to(routePath, { strokeDashoffset: 0, duration: 1.4, ease: 'power1.inOut' })
+        .to('#route-end-dot', { opacity: 1, duration: 0.3 }, '-=0.2')
+        .to('#route-label', { opacity: 1, duration: 0.5 }, '-=0.1');
+    }
 
     /* Process line fill */
     gsap.fromTo('[data-process-fill]', { scaleX:0 }, {

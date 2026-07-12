@@ -78,20 +78,21 @@
     #cursor {
       position: fixed;
       top: 0; left: 0;
-      width: 8px; height: 8px;
-      background: var(--ink);
-      border-radius: 50%;
+      width: 16px; height: 20px;
       pointer-events: none;
       z-index: 9999;
       will-change: transform;
-      transition: width 0.2s ease, height 0.2s ease,
-                  background 0.2s ease, border 0.2s ease, opacity 0.3s;
     }
-    #cursor.hovering {
-      width: 38px; height: 38px;
-      background: transparent;
-      border: 1px solid var(--ink);
+    #cursor svg {
+      display: block;
+      overflow: visible;
+      transform-origin: 50% 60%;
+      transition: transform 0.25s cubic-bezier(.2,.8,.3,1);
     }
+    #cursor.hovering svg { transform: scale(1.4); }
+    #cursor .olive-body { fill: var(--green); transition: fill 0.4s; }
+    #cursor .olive-stem { fill: var(--green-d); transition: fill 0.4s; }
+    #cursor .olive-shine { fill: rgba(255,255,255,0.4); }
 
     /* ─── Loader ─── */
     #loader {
@@ -257,7 +258,13 @@
 <body>
 
 <!-- Custom cursor -->
-<div id="cursor"></div>
+<div id="cursor">
+  <svg viewBox="0 0 20 26" width="16" height="20">
+    <rect class="olive-stem" x="8.4" y="0" width="3.2" height="6" rx="1.6"/>
+    <ellipse class="olive-body" cx="10" cy="15.5" rx="8" ry="10"/>
+    <ellipse class="olive-shine" cx="7" cy="10.8" rx="2.2" ry="3"/>
+  </svg>
+</div>
 
 <!-- Page loader -->
 <div id="loader">
@@ -639,6 +646,19 @@
     var drop = new THREE.Mesh(geo, mat);
     drop.scale.set(1.05, 1.35, 1.05);
     scene.add(drop);
+
+    var stemMat = new THREE.MeshStandardMaterial({ color: 0x3E4A1F, roughness: 0.65 });
+    var stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.24, 8), stemMat);
+    stem.position.set(0.01, 1.03, 0);
+    stem.rotation.z = 0.22;
+    drop.add(stem);
+
+    var leafMat = new THREE.MeshStandardMaterial({ color: 0x6B8E4E, roughness: 0.5, side: THREE.DoubleSide });
+    var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 8), leafMat);
+    leaf.scale.set(1, 0.22, 0.5);
+    leaf.position.set(0.1, 1.14, 0.01);
+    leaf.rotation.set(0.25, 0.5, 0.95);
+    drop.add(leaf);
 
     _three = { scene: scene, camera: camera, drop: drop, geo: geo };
     _scroll = { rotY: 0, x: isMobile ? 0 : 1.35, y: isMobile ? -1.5 : 0, scale: isMobile ? 0.62 : 1 };

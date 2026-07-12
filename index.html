@@ -339,7 +339,7 @@
 
 <!-- Page loader -->
 <div id="loader">
-  <img src="assets/oilive-logo.png" alt="OILIVE">
+  <img id="loader-logo" src="assets/oilive-logo.png" alt="OILIVE">
 </div>
 
 <!-- Dark mode toggle -->
@@ -632,17 +632,20 @@
   var html = document.documentElement;
   var toggleBtn = document.getElementById('theme-toggle');
   var footerLogo = document.getElementById('footer-logo');
+  var loaderLogo = document.getElementById('loader-logo');
   var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   var saved = localStorage.getItem('oilive-theme') || 'light';
   html.setAttribute('data-theme', saved);
   if (footerLogo) footerLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
   if (heroLogo) heroLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
+  if (loaderLogo) loaderLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
   toggleBtn.addEventListener('click', function () {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('oilive-theme', next);
     if (footerLogo) footerLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
     if (heroLogo) heroLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
+    if (loaderLogo) loaderLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
   });
 
   /* ══════════════════════════════

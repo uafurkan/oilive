@@ -760,48 +760,10 @@
     );
     labelBg.position.set(0, 1.15, 0.715);
 
-    var oc = document.createElement('canvas');
-    oc.width = 200; oc.height = 328;
-    var octx = oc.getContext('2d');
-
-    /* O — bold serif ring, matching the wordmark's olive-shaped O */
-    octx.lineWidth = 32;
-    octx.strokeStyle = '#5b7a34';
-    octx.beginPath();
-    octx.ellipse(100, 210, 60, 98, 0, 0, Math.PI * 2);
-    octx.stroke();
-    octx.lineWidth = 5;
-    octx.strokeStyle = 'rgba(31,59,31,0.3)';
-    octx.beginPath();
-    octx.ellipse(100, 210, 46, 83, 0, 0, Math.PI * 2);
-    octx.stroke();
-
-    /* Stem — slim, dark olive, connecting the leaf to the O */
-    octx.fillStyle = '#33421c';
-    octx.beginPath();
-    octx.moveTo(93, 122);
-    octx.quadraticCurveTo(97, 90, 108, 78);
-    octx.quadraticCurveTo(112, 108, 106, 128);
-    octx.closePath();
-    octx.fill();
-
-    /* Leaf — single curved blade, brand green */
-    octx.fillStyle = '#7a9b3f';
-    octx.beginPath();
-    octx.moveTo(107, 84);
-    octx.quadraticCurveTo(122, 48, 158, 30);
-    octx.quadraticCurveTo(140, 62, 107, 84);
-    octx.closePath();
-    octx.fill();
-    octx.strokeStyle = 'rgba(255,255,255,0.3)';
-    octx.lineWidth = 1.4;
-    octx.beginPath();
-    octx.moveTo(112, 80); octx.quadraticCurveTo(134, 54, 152, 36);
-    octx.stroke();
-
-    var labelTex = new THREE.CanvasTexture(oc);
+    var labelTex = new THREE.TextureLoader().load('assets/oilive-o-crop.png');
+    if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
     var labelImg = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.5, 0.82),
+      new THREE.PlaneGeometry(0.44, 0.82),
       new THREE.MeshStandardMaterial({ map: labelTex, transparent: true, roughness: 0.6 })
     );
     labelImg.position.set(0, 1.15, 0.722);

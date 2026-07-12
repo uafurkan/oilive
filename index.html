@@ -756,28 +756,19 @@
     var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.235, 0.2, 0.22, 32), capMat);
     cap.position.y = 2.97;
 
-    var labelBg = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.9, 1.1),
-      new THREE.MeshStandardMaterial({ color: 0xFAFAF7, roughness: 0.75 })
-    );
-    labelBg.position.set(0, 1.15, 0.715);
-
-    var labelTex = new THREE.TextureLoader().load('assets/favicon.png');
+    /* Single opaque label: icon pre-composited onto off-white in the texture,
+       so no alpha blending is involved at render time */
+    var labelTex = new THREE.TextureLoader().load('assets/label.png');
     if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
-    labelTex.generateMipmaps = false;
-    labelTex.minFilter = THREE.LinearFilter;
-    labelTex.magFilter = THREE.LinearFilter;
-    var labelImg = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.52, 0.52),
-      new THREE.MeshStandardMaterial({
-        map: labelTex, transparent: true, alphaTest: 0.35,
-        depthWrite: true, roughness: 0.6
-      })
+    labelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    var label = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.9, 1.1),
+      new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.75 })
     );
-    labelImg.position.set(0, 1.2, 0.723);
+    label.position.set(0, 1.15, 0.72);
 
     var group = new THREE.Group();
-    group.add(body, cap, labelBg, labelImg);
+    group.add(body, cap, label);
     group.position.y = -1.5;
     scene.add(group);
 

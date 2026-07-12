@@ -139,11 +139,13 @@
     }
 
     /* ─── Mini header logo (appears on scroll) ───
-       Two stacked layers: the green O renders normally, while the
-       "ilive" letters are pure white with mix-blend-mode:difference,
-       so they read black over light sections and white over dark
-       ones — adapting pixel by pixel to whatever is underneath. */
-    #mini-logo {
+       Two sibling fixed layers directly under <body>: the green O
+       renders normally, while the "ilive" letters are pure white with
+       mix-blend-mode:difference so they read black over light sections
+       and white over dark ones — adapting pixel by pixel. They must NOT
+       share an animated wrapper: any transformed/faded ancestor becomes
+       an isolated stacking context and the blend stops seeing the page. */
+    .mini-logo-layer {
       position: fixed;
       top: 20px; left: 50%;
       width: 84px;
@@ -154,20 +156,15 @@
       transform: translateY(-14px) scale(0.85);
       pointer-events: none;
       transition: opacity 0.45s ease, transform 0.45s ease;
-      will-change: transform, opacity;
+      display: block;
     }
-    #mini-logo.on {
+    .mini-logo-layer.on {
       opacity: 1;
       transform: none;
       pointer-events: auto;
     }
-    #mini-logo img {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      display: block;
-    }
-    #mini-logo .adaptive-letters { mix-blend-mode: difference; }
-    @media (max-width: 560px) { #mini-logo { width: 72px; margin-left: -36px; top: 22px; } }
+    #mini-logo-letters { mix-blend-mode: difference; }
+    @media (max-width: 560px) { .mini-logo-layer { width: 72px; margin-left: -36px; top: 22px; } }
 
     /* ─── Dark mode toggle ─── */
     #theme-toggle {
@@ -393,10 +390,8 @@
 
 <!-- Dark mode toggle -->
 <a id="collection-nav" href="collection.html">Collection</a>
-<div id="mini-logo" aria-label="OILIVE" role="img">
-  <img class="adaptive-letters" src="assets/logo-layer-letters.png" alt="">
-  <img src="assets/logo-layer-o.png" alt="">
-</div>
+<img id="mini-logo-letters" class="mini-logo-layer" src="assets/logo-layer-letters.png" alt="">
+<img id="mini-logo-o" class="mini-logo-layer" src="assets/logo-layer-o.png" alt="OILIVE">
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <!-- Three.js canvas (fixed, behind everything) -->
@@ -733,7 +728,7 @@
   var toggleBtn = document.getElementById('theme-toggle');
   var footerLogo = document.getElementById('footer-logo');
   var loaderLogo = document.getElementById('loader-logo');
-  var miniLogo = document.getElementById('mini-logo');
+  var miniLogoLayers = document.querySelectorAll('.mini-logo-layer');
   var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   var saved = localStorage.getItem('oilive-theme') || 'light';
   html.setAttribute('data-theme', saved);
@@ -757,14 +752,14 @@
      hero logo scrolls out of view; fades back out (and the
      big logo is there again) when you return to the top.
   ══════════════════════════════ */
-  if (miniLogo && heroLogo) {
+  if (miniLogoLayers.length && heroLogo) {
     var miniShown = false;
     function updateMiniLogo() {
       var heroBottom = heroLogo.getBoundingClientRect().bottom;
       var show = heroBottom < 60;
       if (show !== miniShown) {
         miniShown = show;
-        miniLogo.classList.toggle('on', show);
+        miniLogoLayers.forEach(function (l) { l.classList.toggle('on', show); });
       }
     }
     window.addEventListener('scroll', updateMiniLogo, { passive: true });

@@ -107,14 +107,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.7s ease;
+      transition: background 0.6s ease;
     }
     #loader img {
       width: min(320px, 58vw);
       opacity: 0;
       animation: loaderReveal 1s 0.3s ease forwards;
     }
-    #loader.out { opacity: 0; pointer-events: none; }
+    #loader.out { background: transparent; pointer-events: none; }
     @keyframes loaderReveal {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: none; }
@@ -610,18 +610,54 @@
      LOADER
   ══════════════════════════════ */
   var loader = document.getElementById('loader');
+  var loaderLogo = document.getElementById('loader-logo');
   var heroLogo = document.getElementById('hero-logo');
   window.addEventListener('load', function () {
     setTimeout(function () {
-      loader.classList.add('out');
-      setTimeout(function () { loader.style.display = 'none'; }, 750);
-      if (heroLogo) {
-        heroLogo.style.transition = 'opacity 1.3s ease, transform 1.3s ease';
-        heroLogo.style.transform = 'translateY(14px)';
-        requestAnimationFrame(function () { requestAnimationFrame(function () {
+      if (loaderLogo && heroLogo && loaderLogo.getBoundingClientRect().width) {
+        /* FLIP handoff: the loader logo travels to the hero logo's exact
+           position/size, then a quick crossfade swaps the two so the seam
+           between "loading" and "settled" is invisible. */
+        var fromRect = loaderLogo.getBoundingClientRect();
+        var toRect = heroLogo.getBoundingClientRect();
+        var scale = toRect.width / fromRect.width;
+        var dx = (toRect.left + toRect.width / 2) - (fromRect.left + fromRect.width / 2);
+        var dy = (toRect.top + toRect.height / 2) - (fromRect.top + fromRect.height / 2);
+
+        loaderLogo.style.animation = 'none';
+        loaderLogo.style.position = 'fixed';
+        loaderLogo.style.left = fromRect.left + 'px';
+        loaderLogo.style.top = fromRect.top + 'px';
+        loaderLogo.style.width = fromRect.width + 'px';
+        loaderLogo.style.margin = '0';
+        loaderLogo.style.opacity = '1';
+        loaderLogo.style.zIndex = '8100';
+
+        loader.classList.add('out');
+
+        function settle() {
+          loaderLogo.style.opacity = '0';
+          heroLogo.style.transition = 'opacity 0.18s ease';
+          heroLogo.style.transform = 'none';
           heroLogo.style.opacity = '1';
-          heroLogo.style.transform = 'translateY(0)';
-        }); });
+          setTimeout(function () { loader.style.display = 'none'; }, 200);
+        }
+
+        if (window.gsap) {
+          gsap.to(loaderLogo, {
+            x: dx, y: dy, scale: scale,
+            duration: 1.05, ease: 'power3.inOut',
+            onComplete: settle
+          });
+        } else {
+          loaderLogo.style.transition = 'transform 1.05s cubic-bezier(.2,.8,.2,1)';
+          loaderLogo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + scale + ')';
+          setTimeout(settle, 1050);
+        }
+      } else {
+        loader.classList.add('out');
+        setTimeout(function () { loader.style.display = 'none'; }, 750);
+        if (heroLogo) { heroLogo.style.transform = 'none'; heroLogo.style.opacity = '1'; }
       }
     }, 1700);
   });

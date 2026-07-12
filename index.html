@@ -107,14 +107,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.6s ease;
+      transition: opacity 0.6s ease;
     }
     #loader img {
       width: min(320px, 58vw);
       opacity: 0;
       animation: loaderReveal 1s 0.3s ease forwards;
     }
-    #loader.out { background: transparent; pointer-events: none; }
+    #loader.out { opacity: 0; pointer-events: none; }
     @keyframes loaderReveal {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: none; }
@@ -632,15 +632,22 @@
         loaderLogo.style.margin = '0';
         loaderLogo.style.opacity = '1';
         loaderLogo.style.zIndex = '8100';
+        /* Move it out from under #loader so the backdrop's fade-out
+           (opacity) can't dim the travelling logo along the way. */
+        document.body.appendChild(loaderLogo);
 
         loader.classList.add('out');
 
         function settle() {
           loaderLogo.style.opacity = '0';
+          loaderLogo.style.pointerEvents = 'none';
           heroLogo.style.transition = 'opacity 0.18s ease';
           heroLogo.style.transform = 'none';
           heroLogo.style.opacity = '1';
-          setTimeout(function () { loader.style.display = 'none'; }, 200);
+          setTimeout(function () {
+            loader.style.display = 'none';
+            if (loaderLogo.parentNode) loaderLogo.parentNode.removeChild(loaderLogo);
+          }, 200);
         }
 
         if (window.gsap) {

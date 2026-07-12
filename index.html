@@ -758,7 +758,9 @@
   ══════════════════════════════ */
   if (miniLogoLayers.length && heroLogo) {
     var miniShown = false;
+    var miniLogoTicking = false;
     function updateMiniLogo() {
+      miniLogoTicking = false;
       var heroBottom = heroLogo.getBoundingClientRect().bottom;
       var show = heroBottom < 60;
       if (show !== miniShown) {
@@ -766,8 +768,13 @@
         miniLogoLayers.forEach(function (l) { l.classList.toggle('on', show); });
       }
     }
-    window.addEventListener('scroll', updateMiniLogo, { passive: true });
-    window.addEventListener('resize', updateMiniLogo);
+    function requestMiniLogoUpdate() {
+      if (miniLogoTicking) return;
+      miniLogoTicking = true;
+      requestAnimationFrame(updateMiniLogo);
+    }
+    window.addEventListener('scroll', requestMiniLogoUpdate, { passive: true });
+    window.addEventListener('resize', requestMiniLogoUpdate);
     updateMiniLogo();
   }
 
@@ -994,8 +1001,9 @@
     var canvas = document.getElementById('bottle-canvas');
     if (!canvas || !THREE.PMREMGenerator) return;
 
+    var isMobileBottle = window.innerWidth < 720;
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileBottle ? 1.5 : 2));
 
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(24, 1, 0.1, 20);
@@ -1081,8 +1089,18 @@
 
     var tilt = { sway: -0.1 };
     var mx = 0, my = 0;
+    /* Skip rendering while the bottle is off-screen — cuts GPU work
+       (and the scroll jank it causes) for most of the page's scroll range
+       without altering how the bottle looks whenever it IS visible */
+    var bottleVisible = true;
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (entries) {
+        bottleVisible = entries[0].isIntersecting;
+      }, { rootMargin: '200px 0px' }).observe(canvas);
+    }
     (function tick() {
       requestAnimationFrame(tick);
+      if (!bottleVisible) return;
       mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
       my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
       group.rotation.y = 0.4 + mx * 0.55;

@@ -99,22 +99,6 @@
     #cursor .olive-stem { fill: var(--green-d); transition: fill 0.4s; }
     #cursor .olive-shine { fill: rgba(255,255,255,0.4); }
 
-    /* ─── Drop transition (Hero → Story) ─── */
-    #drop-transition {
-      position: fixed;
-      left: 50%; top: 42%;
-      width: 90px; height: 120px;
-      margin-left: -45px; margin-top: -60px;
-      border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
-      background: radial-gradient(circle at 32% 28%, #8CAF52, #556B2F 58%, #1F3B1F 100%);
-      opacity: 0;
-      transform: scale(0) translateY(-60px);
-      filter: blur(1px);
-      z-index: 1;
-      pointer-events: none;
-      will-change: transform, opacity;
-    }
-
     /* ─── Loader ─── */
     #loader {
       position: fixed; inset: 0;
@@ -363,7 +347,6 @@
 
 <!-- Three.js canvas (fixed, behind everything) -->
 <canvas id="oilive-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
-<div id="drop-transition" aria-hidden="true"></div>
 
 <!-- ══════════════════════════════
      A. HERO
@@ -730,6 +713,14 @@
     mouseNX = (e.clientX / window.innerWidth  - 0.5) * 2;
     mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
   });
+  function updateFromTouch(e) {
+    if (!e.touches || !e.touches.length) return;
+    var t = e.touches[0];
+    mouseNX = (t.clientX / window.innerWidth  - 0.5) * 2;
+    mouseNY = (t.clientY / window.innerHeight - 0.5) * 2;
+  }
+  document.addEventListener('touchstart', updateFromTouch, { passive: true });
+  document.addEventListener('touchmove', updateFromTouch, { passive: true });
 
   /* ══════════════════════════════
      LENIS SMOOTH SCROLL
@@ -837,7 +828,7 @@
     drop.add(leaf);
 
     _three = { scene: scene, camera: camera, drop: drop, geo: geo };
-    _scroll = { rotY: 0, x: isMobile ? 0.8 : 1.35, y: isMobile ? -1.8 : 0, scale: isMobile ? 0.34 : 1 };
+    _scroll = { rotY: 0, x: isMobile ? 0 : 1.35, y: isMobile ? -1.5 : 0, scale: isMobile ? 0.62 : 1 };
 
     window.addEventListener('resize', function () {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -996,12 +987,12 @@
         rotY: 2.6,
         scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'bottom top', scrub:1 }
       });
-      gsap.fromTo(_scroll, { x: _isMobile ? 0.8 : 1.35 }, {
-        x: _isMobile ? 0.95 : 1.7,
+      gsap.fromTo(_scroll, { x: _isMobile ? 0 : 1.35 }, {
+        x: _isMobile ? 0 : 1.7,
         scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'top top', scrub:1 }
       });
       if (_isMobile) {
-        gsap.to(_scroll, { y:-0.6, scrollTrigger:{ trigger:"[data-screen-label='Story']", start:'top bottom', end:'center center', scrub:1 } });
+        gsap.to(_scroll, { y:0, scrollTrigger:{ trigger:"[data-screen-label='Story']", start:'top bottom', end:'center center', scrub:1 } });
       }
       gsap.to(_scroll, {
         scale: 0, ease:'power2.in',
@@ -1048,18 +1039,6 @@
         }
       });
     });
-
-    /* Drop transition — Hero → Story */
-    var dropTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "[data-screen-label='Hero']", start: '55% top',
-        endTrigger: "[data-screen-label='Story']", end: '35% top',
-        scrub: 1
-      }
-    });
-    dropTl
-      .fromTo('#drop-transition', { opacity:0, scale:0, y:-60 }, { opacity:0.9, scale:1, y:0, ease:'power1.out' })
-      .to('#drop-transition', { opacity:0, scale:1.7, y:70, ease:'power1.in' }, '>-0.05');
 
     /* Origin map — route to New York */
     var routePath = document.getElementById('route-path');

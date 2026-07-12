@@ -274,7 +274,7 @@
      A. HERO
 ══════════════════════════════ -->
 <section class="sec-light" data-screen-label="Hero" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
-  <img id="hero-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:min(560px,74vw);height:auto;opacity:0;">
+  <img id="hero-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:min(560px,74vw);height:auto;opacity:0;transition:filter 0.4s;">
   <p style="margin:44px 0 0;font-size:13px;font-weight:500;letter-spacing:0.42em;text-transform:uppercase;color:var(--ink);display:flex;gap:0.42em;flex-wrap:wrap;justify-content:center;">
     <span data-word style="display:inline-block;opacity:0;">Something</span>
     <span data-word style="display:inline-block;opacity:0;color:var(--green);">green</span>
@@ -486,14 +486,17 @@
   var html = document.documentElement;
   var toggleBtn = document.getElementById('theme-toggle');
   var footerLogo = document.getElementById('footer-logo');
+  var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   var saved = localStorage.getItem('oilive-theme') || 'light';
   html.setAttribute('data-theme', saved);
-  if (footerLogo) footerLogo.style.filter = saved === 'dark' ? 'invert(1) brightness(0.85)' : '';
+  if (footerLogo) footerLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
+  if (heroLogo) heroLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
   toggleBtn.addEventListener('click', function () {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('oilive-theme', next);
-    if (footerLogo) footerLogo.style.filter = next === 'dark' ? 'invert(1) brightness(0.85)' : '';
+    if (footerLogo) footerLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
+    if (heroLogo) heroLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
   });
 
   /* ══════════════════════════════

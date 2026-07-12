@@ -138,6 +138,26 @@
       #collection-nav { top: 34px; left: 20px; font-size: 10px; letter-spacing: 0.15em; }
     }
 
+    /* ─── Mini header logo (appears on scroll) ─── */
+    #mini-logo {
+      position: fixed;
+      top: 20px; left: 50%;
+      width: 84px;
+      margin-left: -42px;
+      z-index: 6500;
+      opacity: 0;
+      transform: translateY(-14px) scale(0.85);
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s ease, filter 0.4s;
+      will-change: transform, opacity;
+    }
+    #mini-logo.on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+    @media (max-width: 560px) { #mini-logo { width: 72px; margin-left: -36px; top: 22px; } }
+
     /* ─── Dark mode toggle ─── */
     #theme-toggle {
       position: fixed;
@@ -362,6 +382,7 @@
 
 <!-- Dark mode toggle -->
 <a id="collection-nav" href="collection.html">Collection</a>
+<img id="mini-logo" src="assets/oilive-logo.png" alt="OILIVE">
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <!-- Three.js canvas (fixed, behind everything) -->
@@ -698,20 +719,41 @@
   var toggleBtn = document.getElementById('theme-toggle');
   var footerLogo = document.getElementById('footer-logo');
   var loaderLogo = document.getElementById('loader-logo');
+  var miniLogo = document.getElementById('mini-logo');
   var logoDarkFilter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   var saved = localStorage.getItem('oilive-theme') || 'light';
   html.setAttribute('data-theme', saved);
-  if (footerLogo) footerLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
-  if (heroLogo) heroLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
-  if (loaderLogo) loaderLogo.style.filter = saved === 'dark' ? logoDarkFilter : '';
+  [footerLogo, heroLogo, loaderLogo, miniLogo].forEach(function (l) {
+    if (l) l.style.filter = saved === 'dark' ? logoDarkFilter : '';
+  });
   toggleBtn.addEventListener('click', function () {
     var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('oilive-theme', next);
-    if (footerLogo) footerLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
-    if (heroLogo) heroLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
-    if (loaderLogo) loaderLogo.style.filter = next === 'dark' ? logoDarkFilter : '';
+    [footerLogo, heroLogo, loaderLogo, miniLogo].forEach(function (l) {
+      if (l) l.style.filter = next === 'dark' ? logoDarkFilter : '';
+    });
   });
+
+  /* ══════════════════════════════
+     MINI HEADER LOGO — fades in at top-center once the
+     hero logo scrolls out of view; fades back out (and the
+     big logo is there again) when you return to the top.
+  ══════════════════════════════ */
+  if (miniLogo && heroLogo) {
+    var miniShown = false;
+    function updateMiniLogo() {
+      var heroBottom = heroLogo.getBoundingClientRect().bottom;
+      var show = heroBottom < 60;
+      if (show !== miniShown) {
+        miniShown = show;
+        miniLogo.classList.toggle('on', show);
+      }
+    }
+    window.addEventListener('scroll', updateMiniLogo, { passive: true });
+    window.addEventListener('resize', updateMiniLogo);
+    updateMiniLogo();
+  }
 
   /* ══════════════════════════════
      CUSTOM CURSOR
@@ -1037,75 +1079,6 @@
   }
 
   /* ══════════════════════════════
-     HEADER LOGO SHRINK — the hero logo
-     travels into the fixed top bar (between the
-     Collection link and the theme toggle) on scroll,
-     and grows back when you return to the top.
-  ══════════════════════════════ */
-  function initHeaderLogoShrink() {
-    var heroLogo = document.getElementById('hero-logo');
-    var heroSection = document.querySelector("[data-screen-label='Hero']");
-    if (!heroLogo || !heroSection) return;
-
-    var spacer = document.createElement('div');
-    spacer.setAttribute('aria-hidden', 'true');
-    var heroRect = { left: 0, top: 0, width: 0 };
-    var mini = { width: 80, top: 18, left: 0 };
-    var currentProgress = 0;
-
-    function applyProgress(p) {
-      currentProgress = p;
-      var left = heroRect.left + (mini.left - heroRect.left) * p;
-      var top = heroRect.top + (mini.top - heroRect.top) * p;
-      var width = heroRect.width + (mini.width - heroRect.width) * p;
-      heroLogo.style.left = left + 'px';
-      heroLogo.style.top = top + 'px';
-      heroLogo.style.width = width + 'px';
-    }
-
-    function measure() {
-      /* Briefly return the logo to normal flow to measure its true
-         resting size/position, independent of any current shrink state. */
-      if (spacer.parentNode) spacer.parentNode.removeChild(spacer);
-      heroLogo.style.position = '';
-      heroLogo.style.left = '';
-      heroLogo.style.top = '';
-      heroLogo.style.width = '';
-      heroLogo.style.margin = '';
-
-      var r = heroLogo.getBoundingClientRect();
-      heroRect.left = r.left; heroRect.top = r.top; heroRect.width = r.width;
-
-      spacer.style.width = r.width + 'px';
-      spacer.style.height = r.height + 'px';
-      heroLogo.parentNode.insertBefore(spacer, heroLogo);
-
-      heroLogo.style.position = 'fixed';
-      heroLogo.style.margin = '0';
-      heroLogo.style.zIndex = '6500';
-
-      mini.left = window.innerWidth / 2 - mini.width / 2;
-      applyProgress(currentProgress);
-    }
-
-    measure();
-
-    window.ScrollTrigger.create({
-      trigger: heroSection,
-      start: 'top top',
-      end: '+=220',
-      scrub: 0.3,
-      onUpdate: function (self) { applyProgress(self.progress); }
-    });
-
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(measure, 200);
-    });
-  }
-
-  /* ══════════════════════════════
      GSAP SCROLL ANIMATIONS
   ══════════════════════════════ */
   function initScroll() {
@@ -1118,7 +1091,6 @@
       gsap.ticker.lagSmoothing(0);
     }
 
-    initHeaderLogoShrink();
 
     /* 3D object scroll binding */
     if (_scroll) {

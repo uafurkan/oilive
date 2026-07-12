@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oilive — Something green is coming.</title>
+  <meta name="description" content="Premium cold-pressed extra virgin olive oil from the Aegean. Something green is coming.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: #FAFAF7; color: #1A1A1A; font-family: 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #556B2F; text-decoration: none; }
+    a:hover { color: #1F3B1F; }
+    ::selection { background: #556B2F; color: #FAFAF7; }
+
+    @keyframes oiliveScrollHint {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      45%  { transform: scaleY(1); transform-origin: top; }
+      55%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+    @keyframes oiliveFadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    input::placeholder { color: rgba(26,26,26,0.35); }
+  </style>
+</head>
+<body>
+
+<canvas id="oilive-canvas" style="position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+
+<!-- A. HERO -->
+<section data-screen-label="Hero" style="position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; box-sizing:border-box;">
+  <img src="assets/oilive-logo.png" alt="Oilive" style="width:min(560px, 74vw); height:auto; animation:oiliveFadeIn 1.6s ease both;">
+  <p data-word-line style="margin:44px 0 0; font-size:13px; font-weight:500; letter-spacing:0.42em; text-transform:uppercase; color:#1A1A1A; display:flex; gap:0.42em; flex-wrap:wrap; justify-content:center;">
+    <span data-word style="display:inline-block;">Something</span>
+    <span data-word style="display:inline-block; color:#556B2F;">green</span>
+    <span data-word style="display:inline-block;">is</span>
+    <span data-word style="display:inline-block;">coming.</span>
+  </p>
+  <div style="position:absolute; bottom:36px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:12px;">
+    <span style="font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(26,26,26,0.4);">Scroll</span>
+    <span style="display:block; width:1px; height:48px; background:#556B2F; animation:oiliveScrollHint 2.4s ease-in-out infinite;"></span>
+  </div>
+</section>
+
+<!-- B. STORY -->
+<section data-screen-label="Story" style="position:relative; z-index:1; min-height:100vh; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:center; gap:48px; padding:120px clamp(24px, 8vw, 120px); box-sizing:border-box;">
+  <div style="display:flex; flex-direction:column; gap:40px; max-width:560px;">
+    <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">The Philosophy</span>
+    <h2 style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(36px, 4.6vw, 68px); line-height:1.12; letter-spacing:-0.01em; color:#1A1A1A;">
+      <span data-reveal style="display:block;">Cold-pressed.</span>
+      <span data-reveal style="display:block;">Small batch.</span>
+      <span data-reveal style="display:block; font-style:italic; color:#556B2F;">No compromise.</span>
+    </h2>
+    <p data-reveal style="margin:0; font-size:16px; line-height:1.8; color:rgba(26,26,26,0.65); max-width:42ch; text-wrap:pretty;">One grove. One harvest. Pressed within hours of picking, never blended, never rushed. We make less so that every drop means more.</p>
+  </div>
+  <div aria-hidden="true" style="min-height:40vh;"></div>
+</section>
+
+<!-- C. PROCESS -->
+<section data-screen-label="Process" style="position:relative; z-index:1; padding:140px clamp(24px, 8vw, 120px) 160px; box-sizing:border-box; background:#FAFAF7;">
+  <span data-reveal style="display:block; font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600; margin-bottom:72px;">Grove to Bottle</span>
+  <div style="position:relative; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:48px 40px;">
+    <div style="position:absolute; top:5px; left:0; right:0; height:1px; background:rgba(26,26,26,0.12);">
+      <span data-process-fill style="display:block; height:100%; width:100%; background:#556B2F; transform:scaleX(0); transform-origin:left;"></span>
+    </div>
+    <div data-step style="display:flex; flex-direction:column; gap:20px;">
+      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
+      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Harvest</span>
+      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Hand-picked at first light, in the narrow window when the fruit turns.</p>
+    </div>
+    <div data-step style="display:flex; flex-direction:column; gap:20px;">
+      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
+      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Cold Press</span>
+      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Pressed below 27°C within four hours. Nothing added, nothing lost.</p>
+    </div>
+    <div data-step style="display:flex; flex-direction:column; gap:20px;">
+      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
+      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Bottling</span>
+      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Dark glass, numbered by hand, sealed the same week it was pressed.</p>
+    </div>
+    <div data-step style="display:flex; flex-direction:column; gap:20px;">
+      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
+      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Shipping</span>
+      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">From our press to your door. It never sits in a warehouse.</p>
+    </div>
+  </div>
+</section>
+
+<!-- D. PRODUCT -->
+<section data-screen-label="Product" style="position:relative; z-index:1; background:#1A1A1A; color:#FAFAF7; min-height:100vh; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:center; gap:64px; padding:120px clamp(24px, 8vw, 120px); box-sizing:border-box;">
+  <div style="display:flex; justify-content:center;">
+    <svg data-bottle width="180" height="480" viewBox="0 0 180 480" style="overflow:visible; max-width:38vw; height:auto;">
+      <rect x="74" y="0" width="32" height="26" rx="4" fill="#556B2F"></rect>
+      <rect x="70" y="26" width="40" height="90" rx="10" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"></rect>
+      <path d="M70 116 C 70 150, 20 160, 20 210 L 20 456 C 20 469, 31 480, 44 480 L 136 480 C 149 480, 160 469, 160 456 L 160 210 C 160 160, 110 150, 110 116 Z" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"></path>
+      <rect x="42" y="260" width="96" height="130" rx="2" fill="#FAFAF7"></rect>
+      <image href="assets/oilive-o.png" x="67" y="272" width="46" height="78.7"></image>
+      <rect x="62" y="362" width="56" height="3" fill="#1A1A1A"></rect>
+      <rect x="72" y="372" width="36" height="2" fill="rgba(26,26,26,0.4)"></rect>
+    </svg>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:32px; max-width:480px;">
+    <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">First Pressing — 2026</span>
+    <h2 data-reveal style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(32px, 4vw, 56px); line-height:1.15; letter-spacing:-0.01em;">One harvest. One pressing. Worth the wait.</h2>
+    <p data-reveal style="margin:0; font-size:16px; line-height:1.8; color:rgba(250,250,247,0.6); text-wrap:pretty;">Dark glass to protect what light would ruin. A label that says only what matters. The rest is in the bottle.</p>
+  </div>
+</section>
+
+<!-- E. COMING SOON / SIGNUP -->
+<section data-screen-label="Notify" style="position:relative; z-index:1; background:#FAFAF7; min-height:70vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px; padding:140px 24px; box-sizing:border-box; text-align:center;">
+  <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">Coming Soon</span>
+  <h2 data-reveal style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(28px, 3.6vw, 48px); line-height:1.2; max-width:18ch;">Be the first to know when Oilive launches.</h2>
+
+  <div id="notify-form-wrap" data-reveal>
+    <form id="notify-form" style="display:flex; gap:0; width:min(440px, 90vw); border-bottom:1px solid rgba(26,26,26,0.25);">
+      <input id="notify-email" type="email" required placeholder="Your email address" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:'Instrument Sans', sans-serif; font-size:15px; padding:14px 0; color:#1A1A1A;">
+      <button type="submit" style="border:none; cursor:pointer; background:#556B2F; color:#FAFAF7; font-family:'Instrument Sans', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:0 26px; margin:6px 0; transition:background 0.2s;">Notify Me</button>
+    </form>
+  </div>
+  <p id="notify-thanks" style="display:none; margin:0; font-size:15px; color:#556B2F; letter-spacing:0.06em;">Thank you. You're on the list.</p>
+</section>
+
+<!-- F. FOOTER -->
+<footer data-screen-label="Footer" style="position:relative; z-index:1; background:#FAFAF7; border-top:1px solid rgba(26,26,26,0.08); padding:48px clamp(24px, 8vw, 120px); box-sizing:border-box; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px;">
+  <img src="assets/oilive-logo.png" alt="Oilive" style="width:92px; height:auto;">
+  <div style="display:flex; gap:28px; font-size:12px; letter-spacing:0.12em; text-transform:uppercase;">
+    <a href="https://instagram.com/oiliveco" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.facebook.com/profile.php?id=61591957916677" target="_blank" rel="noopener">Facebook</a>
+    <a href="mailto:hello@oilive.co">Contact</a>
+  </div>
+  <span style="font-size:11px; color:rgba(26,26,26,0.4); letter-spacing:0.08em;">© 2026 Oilive. All rights reserved.</span>
+</footer>
+
+<script>
+(function () {
+  // --- Email form ---
+  var form = document.getElementById('notify-form');
+  var thanks = document.getElementById('notify-thanks');
+  var formWrap = document.getElementById('notify-form-wrap');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = document.getElementById('notify-email').value;
+      if (email) {
+        formWrap.style.display = 'none';
+        thanks.style.display = 'block';
+      }
+    });
+  }
+
+  // --- Three.js + GSAP init (waits for libs to load) ---
+  var _raf = 0;
+  var _renderer, _three, _scroll, _isMobile, _basePos;
+
+  function waitLibs() {
+    if (window.THREE && window.gsap && window.ScrollTrigger) {
+      try { initThree(); } catch (err) { console.warn('3D scene disabled:', err); }
+      try { initScroll(); } catch (err) { console.warn('Scroll animations disabled:', err); }
+    } else {
+      setTimeout(waitLibs, 120);
+    }
+  }
+  waitLibs();
+
+  function initThree() {
+    var THREE = window.THREE;
+    var canvas = document.getElementById('oilive-canvas');
+    var isMobile = window.innerWidth < 720;
+    _isMobile = isMobile;
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !isMobile });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    _renderer = renderer;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 50);
+    camera.position.set(0, 0, 6);
+
+    scene.add(new THREE.AmbientLight(0xfaf9f0, 0.55));
+    var key = new THREE.DirectionalLight(0xfffbe8, 1.15);
+    key.position.set(3, 4, 5);
+    scene.add(key);
+    var rim = new THREE.DirectionalLight(0x9db87a, 0.7);
+    rim.position.set(-4, -2, -3);
+    scene.add(rim);
+
+    var geo = new THREE.SphereGeometry(1, isMobile ? 40 : 72, isMobile ? 40 : 72);
+    _basePos = geo.attributes.position.array.slice();
+
+    var colC = document.createElement('canvas');
+    colC.width = colC.height = 256;
+    var cctx = colC.getContext('2d');
+    cctx.fillStyle = '#556B2F';
+    cctx.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 240; i++) {
+      var shade = Math.random();
+      cctx.fillStyle = shade > 0.5 ? 'rgba(31,59,31,0.16)' : 'rgba(139,158,84,0.13)';
+      cctx.beginPath();
+      cctx.arc(Math.random() * 256, Math.random() * 256, 4 + Math.random() * 16, 0, 7);
+      cctx.fill();
+    }
+    for (var j = 0; j < 900; j++) {
+      cctx.fillStyle = 'rgba(26,26,26,0.07)';
+      cctx.beginPath();
+      cctx.arc(Math.random() * 256, Math.random() * 256, 0.4 + Math.random() * 1.1, 0, 7);
+      cctx.fill();
+    }
+    var colTex = new THREE.CanvasTexture(colC);
+    colTex.wrapS = colTex.wrapT = THREE.RepeatWrapping;
+    colTex.repeat.set(2, 2);
+
+    var bmpC = document.createElement('canvas');
+    bmpC.width = bmpC.height = 256;
+    var bctx = bmpC.getContext('2d');
+    bctx.fillStyle = '#808080';
+    bctx.fillRect(0, 0, 256, 256);
+    for (var k = 0; k < 2600; k++) {
+      var g = 90 + (Math.random() * 100 | 0);
+      bctx.fillStyle = 'rgb(' + g + ',' + g + ',' + g + ')';
+      bctx.beginPath();
+      bctx.arc(Math.random() * 256, Math.random() * 256, 0.4 + Math.random() * 1.6, 0, 7);
+      bctx.fill();
+    }
+    var bumpTex = new THREE.CanvasTexture(bmpC);
+    bumpTex.wrapS = bumpTex.wrapT = THREE.RepeatWrapping;
+    bumpTex.repeat.set(3, 3);
+
+    var mat = new THREE.MeshPhysicalMaterial({
+      map: colTex,
+      bumpMap: bumpTex,
+      bumpScale: 0.02,
+      roughness: 0.32,
+      metalness: 0.0,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.25
+    });
+    var drop = new THREE.Mesh(geo, mat);
+    drop.scale.set(1.05, 1.35, 1.05);
+    scene.add(drop);
+
+    _three = { scene: scene, camera: camera, drop: drop, geo: geo };
+    _scroll = { rotY: 0, x: isMobile ? 0 : 1.35, y: isMobile ? -1.5 : 0, scale: isMobile ? 0.62 : 1 };
+
+    window.addEventListener('resize', function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    var v = new THREE.Vector3();
+    var clock = new THREE.Clock();
+    function tick() {
+      _raf = requestAnimationFrame(tick);
+      var t = clock.getElapsedTime();
+      var pos = geo.attributes.position;
+      var base = _basePos;
+      for (var i = 0; i < pos.count; i++) {
+        v.set(base[i * 3], base[i * 3 + 1], base[i * 3 + 2]);
+        var n = 0.045 * Math.sin(v.x * 3.1 + t * 0.8) * Math.sin(v.y * 2.3 + t * 0.6) + 0.03 * Math.sin(v.z * 4.2 + t * 0.5);
+        v.multiplyScalar(1 + n);
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      pos.needsUpdate = true;
+      geo.computeVertexNormals();
+
+      drop.rotation.y = t * 0.12 + _scroll.rotY;
+      drop.rotation.z = 0.12 * Math.sin(t * 0.3);
+      drop.position.x = _scroll.x;
+      drop.position.y = _scroll.y + 0.05 * Math.sin(t * 0.7);
+      var s = _scroll.scale;
+      drop.scale.set(1.05 * s, 1.35 * s, 1.05 * s);
+      renderer.render(scene, camera);
+    }
+    tick();
+  }
+
+  function initScroll() {
+    var gsap = window.gsap;
+    gsap.registerPlugin(window.ScrollTrigger);
+
+    if (_scroll) {
+      gsap.to(_scroll, {
+        rotY: 2.6,
+        scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'bottom top', scrub: 1 }
+      });
+      gsap.fromTo(_scroll, { x: _isMobile ? 0 : 1.35 }, {
+        x: _isMobile ? 0 : 1.7,
+        scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'top top', scrub: 1 }
+      });
+      if (_isMobile) {
+        gsap.to(_scroll, {
+          y: 0,
+          scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'center center', scrub: 1 }
+        });
+      }
+      gsap.to(_scroll, {
+        scale: 0,
+        ease: 'power2.in',
+        scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 90%', end: 'top 30%', scrub: 1 }
+      });
+    }
+
+    gsap.fromTo('[data-word]', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.18, delay: 0.9, ease: 'power2.out' });
+
+    document.querySelectorAll('[data-reveal]').forEach(function (el) {
+      gsap.fromTo(el, { opacity: 0, y: 28 }, {
+        opacity: 1, y: 0, duration: 1, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 85%' }
+      });
+    });
+
+    gsap.fromTo('[data-process-fill]', { scaleX: 0 }, {
+      scaleX: 1, ease: 'none',
+      scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 60%', end: 'bottom 80%', scrub: 1 }
+    });
+
+    document.querySelectorAll('[data-step-dot]').forEach(function (dot) {
+      gsap.to(dot, {
+        backgroundColor: '#556B2F', borderColor: '#556B2F', duration: 0.4,
+        scrollTrigger: { trigger: dot, start: 'top 70%' }
+      });
+    });
+
+    document.querySelectorAll('[data-step]').forEach(function (el, i) {
+      gsap.fromTo(el, { opacity: 0, y: 24 }, {
+        opacity: 1, y: 0, duration: 0.8, delay: i * 0.12, ease: 'power2.out',
+        scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 65%' }
+      });
+    });
+
+    gsap.fromTo('[data-bottle]', { rotation: -6, y: 40 }, {
+      rotation: 3, y: -20, ease: 'none',
+      scrollTrigger: { trigger: "[data-screen-label='Product']", start: 'top bottom', end: 'bottom top', scrub: 1 }
+    });
+  }
+})();
+</script>
+</body>
+</html>

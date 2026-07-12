@@ -1037,6 +1037,75 @@
   }
 
   /* ══════════════════════════════
+     HEADER LOGO SHRINK — the hero logo
+     travels into the fixed top bar (between the
+     Collection link and the theme toggle) on scroll,
+     and grows back when you return to the top.
+  ══════════════════════════════ */
+  function initHeaderLogoShrink() {
+    var heroLogo = document.getElementById('hero-logo');
+    var heroSection = document.querySelector("[data-screen-label='Hero']");
+    if (!heroLogo || !heroSection) return;
+
+    var spacer = document.createElement('div');
+    spacer.setAttribute('aria-hidden', 'true');
+    var heroRect = { left: 0, top: 0, width: 0 };
+    var mini = { width: 80, top: 18, left: 0 };
+    var currentProgress = 0;
+
+    function applyProgress(p) {
+      currentProgress = p;
+      var left = heroRect.left + (mini.left - heroRect.left) * p;
+      var top = heroRect.top + (mini.top - heroRect.top) * p;
+      var width = heroRect.width + (mini.width - heroRect.width) * p;
+      heroLogo.style.left = left + 'px';
+      heroLogo.style.top = top + 'px';
+      heroLogo.style.width = width + 'px';
+    }
+
+    function measure() {
+      /* Briefly return the logo to normal flow to measure its true
+         resting size/position, independent of any current shrink state. */
+      if (spacer.parentNode) spacer.parentNode.removeChild(spacer);
+      heroLogo.style.position = '';
+      heroLogo.style.left = '';
+      heroLogo.style.top = '';
+      heroLogo.style.width = '';
+      heroLogo.style.margin = '';
+
+      var r = heroLogo.getBoundingClientRect();
+      heroRect.left = r.left; heroRect.top = r.top; heroRect.width = r.width;
+
+      spacer.style.width = r.width + 'px';
+      spacer.style.height = r.height + 'px';
+      heroLogo.parentNode.insertBefore(spacer, heroLogo);
+
+      heroLogo.style.position = 'fixed';
+      heroLogo.style.margin = '0';
+      heroLogo.style.zIndex = '6500';
+
+      mini.left = window.innerWidth / 2 - mini.width / 2;
+      applyProgress(currentProgress);
+    }
+
+    measure();
+
+    window.ScrollTrigger.create({
+      trigger: heroSection,
+      start: 'top top',
+      end: '+=220',
+      scrub: 0.3,
+      onUpdate: function (self) { applyProgress(self.progress); }
+    });
+
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(measure, 200);
+    });
+  }
+
+  /* ══════════════════════════════
      GSAP SCROLL ANIMATIONS
   ══════════════════════════════ */
   function initScroll() {
@@ -1048,6 +1117,8 @@
       lenis.on('scroll', window.ScrollTrigger.update);
       gsap.ticker.lagSmoothing(0);
     }
+
+    initHeaderLogoShrink();
 
     /* 3D object scroll binding */
     if (_scroll) {

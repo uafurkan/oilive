@@ -833,7 +833,7 @@
     drop.add(leaf);
 
     _three = { scene: scene, camera: camera, drop: drop, geo: geo };
-    _scroll = { rotY: 0, x: isMobile ? 0 : 1.35, y: isMobile ? -1.5 : 0, scale: isMobile ? 0.62 : 1 };
+    _scroll = { rotY: 0, x: isMobile ? 0.8 : 1.35, y: isMobile ? -1.8 : 0, scale: isMobile ? 0.34 : 1 };
 
     window.addEventListener('resize', function () {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -992,12 +992,12 @@
         rotY: 2.6,
         scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'bottom top', scrub:1 }
       });
-      gsap.fromTo(_scroll, { x: _isMobile ? 0 : 1.35 }, {
-        x: _isMobile ? 0 : 1.7,
+      gsap.fromTo(_scroll, { x: _isMobile ? 0.8 : 1.35 }, {
+        x: _isMobile ? 0.95 : 1.7,
         scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'top top', scrub:1 }
       });
       if (_isMobile) {
-        gsap.to(_scroll, { y:0, scrollTrigger:{ trigger:"[data-screen-label='Story']", start:'top bottom', end:'center center', scrub:1 } });
+        gsap.to(_scroll, { y:-0.6, scrollTrigger:{ trigger:"[data-screen-label='Story']", start:'top bottom', end:'center center', scrub:1 } });
       }
       gsap.to(_scroll, {
         scale: 0, ease:'power2.in',

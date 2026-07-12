@@ -14,7 +14,7 @@
     body { margin:0; background:var(--bg); color:var(--ink); font-family:'Instrument Sans',system-ui,sans-serif; transition:background 0.5s,color 0.5s; }
     a { color:var(--green); }
     header { display:flex; align-items:center; justify-content:space-between; padding:32px clamp(24px,8vw,120px); }
-    header img { width:108px; height:auto; }
+    header img { width:108px; height:auto; transition:filter 0.4s; }
     .back-link { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--ink-65); }
     main { max-width:720px; margin:0 auto; padding:40px clamp(24px,8vw,24px) 120px; }
     h1 { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(30px,4vw,44px); margin:0 0 12px; }
@@ -27,9 +27,17 @@
 </head>
 <body>
 <header>
-  <a href="index.html"><img src="assets/oilive-logo.png" alt="OILIVE"></a>
+  <a href="index.html"><img id="header-logo" src="assets/oilive-logo.png" alt="OILIVE"></a>
   <a class="back-link" href="index.html">&larr; Home</a>
 </header>
+<script>
+  (function () {
+    var saved = localStorage.getItem('oilive-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    var logo = document.getElementById('header-logo');
+    if (logo && saved === 'dark') logo.style.filter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
+  })();
+</script>
 <main>
   <h1>Terms of Use</h1>
   <span class="updated">Last updated January 2026</span>

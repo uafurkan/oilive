@@ -1,149 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Oilive — Something green is coming.</title>
+  <title>OILIVE — Something green is coming.</title>
   <meta name="description" content="Premium cold-pressed extra virgin olive oil from the Aegean. Something green is coming.">
+
+  <!-- OG / Social meta -->
+  <meta property="og:title" content="OILIVE — Something green is coming.">
+  <meta property="og:description" content="Premium cold-pressed extra virgin olive oil. Single origin. First pressing 2026.">
+  <meta property="og:image" content="https://oilive.co/assets/oilive-logo.png">
+  <meta property="og:url" content="https://oilive.co">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OILIVE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OILIVE — Something green is coming.">
+  <meta name="twitter:description" content="Premium cold-pressed extra virgin olive oil. Single origin. First pressing 2026.">
+  <meta name="twitter:image" content="https://oilive.co/assets/oilive-logo.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
   <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
   <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <style>
-    html { scroll-behavior: smooth; }
-    *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; background: #FAFAF7; color: #1A1A1A; font-family: 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-    a { color: #556B2F; text-decoration: none; }
-    a:hover { color: #1F3B1F; }
-    ::selection { background: #556B2F; color: #FAFAF7; }
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 
+  <style>
+    /* ─── Theme tokens ─── */
+    :root {
+      --bg:      #FAFAF7;
+      --bg-alt:  #F2F1EB;
+      --bg-dark: #1A1A1A;
+      --ink:     #1A1A1A;
+      --ink-65:  rgba(26,26,26,0.65);
+      --ink-40:  rgba(26,26,26,0.40);
+      --ink-25:  rgba(26,26,26,0.25);
+      --ink-12:  rgba(26,26,26,0.12);
+      --ink-08:  rgba(26,26,26,0.08);
+      --green:   #556B2F;
+      --green-d: #1F3B1F;
+    }
+    [data-theme="dark"] {
+      --bg:      #0B160B;
+      --bg-alt:  #101E10;
+      --bg-dark: #060E06;
+      --ink:     #FAFAF7;
+      --ink-65:  rgba(250,250,247,0.65);
+      --ink-40:  rgba(250,250,247,0.40);
+      --ink-25:  rgba(250,250,247,0.25);
+      --ink-12:  rgba(250,250,247,0.12);
+      --ink-08:  rgba(250,250,247,0.08);
+      --green:   #7A9B3F;
+      --green-d: #556B2F;
+    }
+
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: auto; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Instrument Sans', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+      transition: background 0.5s, color 0.5s;
+    }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { color: var(--green-d); }
+    ::selection { background: var(--green); color: #FAFAF7; }
+    input::placeholder { color: var(--ink-40); }
+    @media (pointer: coarse) { body { cursor: auto; } #cursor { display: none !important; } }
+
+    /* ─── Cursor ─── */
+    #cursor {
+      position: fixed;
+      top: 0; left: 0;
+      width: 8px; height: 8px;
+      background: var(--ink);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      will-change: transform;
+      transition: width 0.2s ease, height 0.2s ease,
+                  background 0.2s ease, border 0.2s ease, opacity 0.3s;
+    }
+    #cursor.hovering {
+      width: 38px; height: 38px;
+      background: transparent;
+      border: 1px solid var(--ink);
+    }
+
+    /* ─── Loader ─── */
+    #loader {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 8000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.7s ease;
+    }
+    #loader img {
+      width: min(320px, 58vw);
+      opacity: 0;
+      animation: loaderReveal 1s 0.3s ease forwards;
+    }
+    #loader.out { opacity: 0; pointer-events: none; }
+    @keyframes loaderReveal {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ─── Dark mode toggle ─── */
+    #theme-toggle {
+      position: fixed;
+      top: 28px; right: 28px;
+      z-index: 7000;
+      width: 46px; height: 26px;
+      border: 1px solid var(--ink-25);
+      border-radius: 13px;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      transition: border-color 0.3s;
+    }
+    #theme-toggle::after {
+      content: '';
+      display: block;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--ink);
+      margin-left: 3px;
+      transition: transform 0.3s ease, background 0.3s;
+    }
+    [data-theme="dark"] #theme-toggle::after {
+      transform: translateX(20px);
+      background: var(--green);
+    }
+
+    /* ─── Section base ─── */
+    .sec-light {
+      background: var(--bg);
+      color: var(--ink);
+      transition: background 0.5s, color 0.5s;
+    }
+    .sec-dark {
+      background: var(--bg-dark);
+      color: #FAFAF7;
+      transition: background 0.5s;
+    }
+
+    /* ─── Process steps ─── */
+    .process-step {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .step-dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--ink-25);
+      box-sizing: border-box;
+      transition: background 0.35s, border-color 0.35s;
+    }
+    .step-dot.active { background: var(--green); border-color: var(--green); }
+
+    /* ─── Spec numbers ─── */
+    .specs-row { display: flex; gap: 40px; flex-wrap: wrap; }
+    .spec-item { display: flex; flex-direction: column; gap: 6px; }
+    .spec-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      font-weight: 500;
+      color: var(--green);
+      line-height: 1;
+    }
+    .spec-label {
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(250,250,247,0.45);
+    }
+
+    /* ─── Press logos ─── */
+    .press-logos {
+      display: flex;
+      align-items: center;
+      gap: clamp(28px, 5vw, 72px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .press-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(14px, 1.8vw, 20px);
+      font-weight: 500;
+      color: var(--ink-25);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      opacity: 0;
+      transition: color 0.3s;
+    }
+    .press-logo:hover { color: var(--ink-65); }
+
+    /* ─── Notify form ─── */
+    #notify-email {
+      flex: 1; min-width: 0;
+      border: none; outline: none;
+      background: transparent;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 15px; padding: 14px 0;
+      color: var(--ink);
+    }
+    #notify-btn {
+      border: none; cursor: pointer;
+      background: var(--green); color: #FAFAF7;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0 26px; margin: 6px 0;
+      transition: background 0.2s;
+    }
+    #notify-btn:hover { background: var(--green-d); }
+
+    /* ─── Footer links ─── */
+    .footer-link {
+      color: var(--ink); font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--green); }
+
+    /* ─── Map pin pulse ─── */
+    @keyframes pinPulse {
+      0%, 100% { opacity: 0.2; r: 10; }
+      50%       { opacity: 0.45; r: 16; }
+    }
+    .pin-ring { animation: pinPulse 2.4s ease-in-out infinite; }
+
+    /* ─── Scroll hint ─── */
     @keyframes oiliveScrollHint {
       0%   { transform: scaleY(0); transform-origin: top; }
       45%  { transform: scaleY(1); transform-origin: top; }
       55%  { transform: scaleY(1); transform-origin: bottom; }
       100% { transform: scaleY(0); transform-origin: bottom; }
     }
-    @keyframes oiliveFadeIn {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    input::placeholder { color: rgba(26,26,26,0.35); }
   </style>
 </head>
 <body>
 
-<canvas id="oilive-canvas" style="position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+<!-- Custom cursor -->
+<div id="cursor"></div>
 
-<!-- A. HERO -->
-<section data-screen-label="Hero" style="position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; box-sizing:border-box;">
-  <img src="assets/oilive-logo.png" alt="Oilive" style="width:min(560px, 74vw); height:auto; animation:oiliveFadeIn 1.6s ease both;">
-  <p data-word-line style="margin:44px 0 0; font-size:13px; font-weight:500; letter-spacing:0.42em; text-transform:uppercase; color:#1A1A1A; display:flex; gap:0.42em; flex-wrap:wrap; justify-content:center;">
-    <span data-word style="display:inline-block;">Something</span>
-    <span data-word style="display:inline-block; color:#556B2F;">green</span>
-    <span data-word style="display:inline-block;">is</span>
-    <span data-word style="display:inline-block;">coming.</span>
+<!-- Page loader -->
+<div id="loader">
+  <img src="assets/oilive-logo.png" alt="OILIVE">
+</div>
+
+<!-- Dark mode toggle -->
+<button id="theme-toggle" aria-label="Toggle dark mode"></button>
+
+<!-- Three.js canvas (fixed, behind everything) -->
+<canvas id="oilive-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+<!-- ══════════════════════════════
+     A. HERO
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Hero" style="position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;">
+  <img id="hero-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:min(560px,74vw);height:auto;opacity:0;">
+  <p style="margin:44px 0 0;font-size:13px;font-weight:500;letter-spacing:0.42em;text-transform:uppercase;color:var(--ink);display:flex;gap:0.42em;flex-wrap:wrap;justify-content:center;">
+    <span data-word style="display:inline-block;opacity:0;">Something</span>
+    <span data-word style="display:inline-block;opacity:0;color:var(--green);">green</span>
+    <span data-word style="display:inline-block;opacity:0;">is</span>
+    <span data-word style="display:inline-block;opacity:0;">coming.</span>
   </p>
-  <div style="position:absolute; bottom:36px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:12px;">
-    <span style="font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(26,26,26,0.4);">Scroll</span>
-    <span style="display:block; width:1px; height:48px; background:#556B2F; animation:oiliveScrollHint 2.4s ease-in-out infinite;"></span>
+  <div style="position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--ink-40);">Scroll</span>
+    <span style="display:block;width:1px;height:48px;background:var(--green);animation:oiliveScrollHint 2.4s ease-in-out infinite;"></span>
   </div>
 </section>
 
-<!-- B. STORY -->
-<section data-screen-label="Story" style="position:relative; z-index:1; min-height:100vh; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:center; gap:48px; padding:120px clamp(24px, 8vw, 120px); box-sizing:border-box;">
-  <div style="display:flex; flex-direction:column; gap:40px; max-width:560px;">
-    <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">The Philosophy</span>
-    <h2 style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(36px, 4.6vw, 68px); line-height:1.12; letter-spacing:-0.01em; color:#1A1A1A;">
+<!-- ══════════════════════════════
+     B. STORY
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Story" style="position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:center;gap:48px;padding:120px clamp(24px,8vw,120px);">
+  <div style="display:flex;flex-direction:column;gap:40px;max-width:560px;">
+    <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;">The Philosophy</span>
+    <h2 style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(36px,4.6vw,68px);line-height:1.12;letter-spacing:-0.01em;color:var(--ink);">
       <span data-reveal style="display:block;">Cold-pressed.</span>
       <span data-reveal style="display:block;">Small batch.</span>
-      <span data-reveal style="display:block; font-style:italic; color:#556B2F;">No compromise.</span>
+      <span data-reveal style="display:block;font-style:italic;color:var(--green);">No compromise.</span>
     </h2>
-    <p data-reveal style="margin:0; font-size:16px; line-height:1.8; color:rgba(26,26,26,0.65); max-width:42ch; text-wrap:pretty;">One grove. One harvest. Pressed within hours of picking, never blended, never rushed. We make less so that every drop means more.</p>
+    <p data-reveal style="margin:0;font-size:16px;line-height:1.8;color:var(--ink-65);max-width:42ch;text-wrap:pretty;">One grove. One harvest. Pressed within hours of picking, never blended, never rushed. We make less so that every drop means more.</p>
   </div>
   <div aria-hidden="true" style="min-height:40vh;"></div>
 </section>
 
-<!-- C. PROCESS -->
-<section data-screen-label="Process" style="position:relative; z-index:1; padding:140px clamp(24px, 8vw, 120px) 160px; box-sizing:border-box; background:#FAFAF7;">
-  <span data-reveal style="display:block; font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600; margin-bottom:72px;">Grove to Bottle</span>
-  <div style="position:relative; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:48px 40px;">
-    <div style="position:absolute; top:5px; left:0; right:0; height:1px; background:rgba(26,26,26,0.12);">
-      <span data-process-fill style="display:block; height:100%; width:100%; background:#556B2F; transform:scaleX(0); transform-origin:left;"></span>
-    </div>
-    <div data-step style="display:flex; flex-direction:column; gap:20px;">
-      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
-      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Harvest</span>
-      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Hand-picked at first light, in the narrow window when the fruit turns.</p>
-    </div>
-    <div data-step style="display:flex; flex-direction:column; gap:20px;">
-      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
-      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Cold Press</span>
-      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Pressed below 27°C within four hours. Nothing added, nothing lost.</p>
-    </div>
-    <div data-step style="display:flex; flex-direction:column; gap:20px;">
-      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
-      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Bottling</span>
-      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">Dark glass, numbered by hand, sealed the same week it was pressed.</p>
-    </div>
-    <div data-step style="display:flex; flex-direction:column; gap:20px;">
-      <span data-step-dot style="width:11px; height:11px; border-radius:50%; background:#FAFAF7; border:1px solid rgba(26,26,26,0.3); box-sizing:border-box;"></span>
-      <span style="font-family:'Playfair Display', serif; font-size:24px; font-weight:500;">Shipping</span>
-      <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(26,26,26,0.6);">From our press to your door. It never sits in a warehouse.</p>
+<!-- ══════════════════════════════
+     B2. ORIGIN
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Origin" style="position:relative;z-index:1;padding:140px clamp(24px,8vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:center;gap:80px;border-top:1px solid var(--ink-08);">
+  <div style="display:flex;flex-direction:column;gap:36px;">
+    <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;">Origin</span>
+    <h2 data-reveal style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(30px,3.8vw,52px);line-height:1.15;letter-spacing:-0.01em;color:var(--ink);">Aegean coast.<br><span style="font-style:italic;">37°48′N, 27°50′E</span></h2>
+    <p data-reveal style="margin:0;font-size:15px;line-height:1.85;color:var(--ink-65);max-width:44ch;text-wrap:pretty;">Our grove sits at 280 metres above the Aegean shoreline, where cool nights and dry summers concentrate the oil's polyphenols naturally. The same family has tended these trees for four generations.</p>
+    <div data-reveal style="display:flex;flex-direction:column;gap:10px;padding-left:20px;border-left:2px solid var(--green);">
+      <span style="font-size:13px;color:var(--ink-65);">Variety — <strong style="color:var(--ink);font-weight:600;">Memecik</strong></span>
+      <span style="font-size:13px;color:var(--ink-65);">Elevation — <strong style="color:var(--ink);font-weight:600;">280 m</strong></span>
+      <span style="font-size:13px;color:var(--ink-65);">Region — <strong style="color:var(--ink);font-weight:600;">Muğla, Türkiye</strong></span>
     </div>
   </div>
-</section>
-
-<!-- D. PRODUCT -->
-<section data-screen-label="Product" style="position:relative; z-index:1; background:#1A1A1A; color:#FAFAF7; min-height:100vh; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:center; gap:64px; padding:120px clamp(24px, 8vw, 120px); box-sizing:border-box;">
-  <div style="display:flex; justify-content:center;">
-    <svg data-bottle width="180" height="480" viewBox="0 0 180 480" style="overflow:visible; max-width:38vw; height:auto;">
-      <rect x="74" y="0" width="32" height="26" rx="4" fill="#556B2F"></rect>
-      <rect x="70" y="26" width="40" height="90" rx="10" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"></rect>
-      <path d="M70 116 C 70 150, 20 160, 20 210 L 20 456 C 20 469, 31 480, 44 480 L 136 480 C 149 480, 160 469, 160 456 L 160 210 C 160 160, 110 150, 110 116 Z" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"></path>
-      <rect x="42" y="260" width="96" height="130" rx="2" fill="#FAFAF7"></rect>
-      <image href="assets/oilive-o.png" x="67" y="272" width="46" height="78.7"></image>
-      <rect x="62" y="362" width="56" height="3" fill="#1A1A1A"></rect>
-      <rect x="72" y="372" width="36" height="2" fill="rgba(26,26,26,0.4)"></rect>
+  <!-- Minimal Aegean map -->
+  <div data-reveal style="display:flex;align-items:center;justify-content:center;">
+    <svg viewBox="0 0 380 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;opacity:0.88;" aria-hidden="true">
+      <!-- Grid -->
+      <line x1="0" y1="133" x2="380" y2="133" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <line x1="0" y1="200" x2="380" y2="200" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <line x1="0" y1="267" x2="380" y2="267" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <line x1="95"  y1="0" x2="95"  y2="400" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <line x1="190" y1="0" x2="190" y2="400" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <line x1="285" y1="0" x2="285" y2="400" stroke="var(--ink-12)" stroke-width="0.5"/>
+      <!-- Simplified Aegean coast (west Turkey) -->
+      <path d="M55 18 L72 55 L64 96 L82 124 L76 162 L94 182 L88 214 L106 244 L100 280 L122 310 L144 348 L166 378 L188 396" stroke="var(--ink-25)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Islands -->
+      <ellipse cx="252" cy="172" rx="26" ry="10" fill="none" stroke="var(--ink-25)" stroke-width="1"/>
+      <ellipse cx="292" cy="250" rx="18" ry="7"  fill="none" stroke="var(--ink-25)" stroke-width="1"/>
+      <ellipse cx="224" cy="298" rx="14" ry="6"  fill="none" stroke="var(--ink-25)" stroke-width="1"/>
+      <ellipse cx="310" cy="328" rx="22" ry="8"  fill="none" stroke="var(--ink-25)" stroke-width="1"/>
+      <!-- Pin — approx. Muğla -->
+      <circle class="pin-ring" cx="120" cy="286" r="12" fill="var(--green)" opacity="0.2"/>
+      <circle cx="120" cy="286" r="5" fill="var(--green)"/>
+      <!-- Label -->
+      <text x="136" y="282" font-family="'Instrument Sans',sans-serif" font-size="10" fill="var(--ink-65)" letter-spacing="0.05em">37°48′N</text>
+      <text x="136" y="296" font-family="'Instrument Sans',sans-serif" font-size="10" fill="var(--ink-65)" letter-spacing="0.05em">27°50′E</text>
+      <!-- Compass -->
+      <text x="352" y="28" font-family="'Instrument Sans',sans-serif" font-size="11" fill="var(--ink-40)" text-anchor="middle">N</text>
+      <line x1="352" y1="32" x2="352" y2="46" stroke="var(--ink-40)" stroke-width="1"/>
     </svg>
   </div>
-  <div style="display:flex; flex-direction:column; gap:32px; max-width:480px;">
-    <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">First Pressing — 2026</span>
-    <h2 data-reveal style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(32px, 4vw, 56px); line-height:1.15; letter-spacing:-0.01em;">One harvest. One pressing. Worth the wait.</h2>
-    <p data-reveal style="margin:0; font-size:16px; line-height:1.8; color:rgba(250,250,247,0.6); text-wrap:pretty;">Dark glass to protect what light would ruin. A label that says only what matters. The rest is in the bottle.</p>
+</section>
+
+<!-- ══════════════════════════════
+     C. PROCESS
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Process" style="position:relative;z-index:1;padding:140px clamp(24px,8vw,120px) 160px;border-top:1px solid var(--ink-08);">
+  <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:72px;">Grove to Bottle</span>
+  <div style="position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:48px 40px;">
+    <div style="position:absolute;top:5px;left:0;right:0;height:1px;background:var(--ink-12);">
+      <span data-process-fill style="display:block;height:100%;width:100%;background:var(--green);transform:scaleX(0);transform-origin:left;"></span>
+    </div>
+    <div class="process-step" data-step>
+      <span class="step-dot" data-step-dot></span>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--ink);">Harvest</span>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:var(--ink-65);">Hand-picked at first light, in the narrow window when the fruit turns.</p>
+    </div>
+    <div class="process-step" data-step>
+      <span class="step-dot" data-step-dot></span>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--ink);">Cold Press</span>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:var(--ink-65);">Pressed below 27°C within four hours. Nothing added, nothing lost.</p>
+    </div>
+    <div class="process-step" data-step>
+      <span class="step-dot" data-step-dot></span>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--ink);">Bottling</span>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:var(--ink-65);">Dark glass, numbered by hand, sealed the same week it was pressed.</p>
+    </div>
+    <div class="process-step" data-step>
+      <span class="step-dot" data-step-dot></span>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--ink);">Shipping</span>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:var(--ink-65);">From our press to your door. It never sits in a warehouse.</p>
+    </div>
   </div>
 </section>
 
-<!-- E. COMING SOON / SIGNUP -->
-<section data-screen-label="Notify" style="position:relative; z-index:1; background:#FAFAF7; min-height:70vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px; padding:140px 24px; box-sizing:border-box; text-align:center;">
-  <span data-reveal style="font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:#556B2F; font-weight:600;">Coming Soon</span>
-  <h2 data-reveal style="margin:0; font-family:'Playfair Display', serif; font-weight:500; font-size:clamp(28px, 3.6vw, 48px); line-height:1.2; max-width:18ch;">Be the first to know when Oilive launches.</h2>
+<!-- ══════════════════════════════
+     D. PRODUCT
+══════════════════════════════ -->
+<section class="sec-dark" data-screen-label="Product" style="position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:center;gap:64px;padding:120px clamp(24px,8vw,120px);">
+  <div style="display:flex;justify-content:center;">
+    <svg id="bottle-svg" data-bottle width="180" height="480" viewBox="0 0 180 480" style="overflow:visible;max-width:38vw;height:auto;transform-style:preserve-3d;">
+      <rect x="74" y="0" width="32" height="26" rx="4" fill="#556B2F"/>
+      <rect x="70" y="26" width="40" height="90" rx="10" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"/>
+      <path d="M70 116 C70 150,20 160,20 210 L20 456 C20 469,31 480,44 480 L136 480 C149 480,160 469,160 456 L160 210 C160 160,110 150,110 116 Z" fill="none" stroke="rgba(250,250,247,0.35)" stroke-width="1.5"/>
+      <rect x="42" y="260" width="96" height="130" rx="2" fill="#FAFAF7"/>
+      <image href="assets/oilive-o.png" x="67" y="272" width="46" height="78.7"/>
+      <rect x="62" y="362" width="56" height="3" fill="#1A1A1A"/>
+      <rect x="72" y="372" width="36" height="2" fill="rgba(26,26,26,0.4)"/>
+    </svg>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:40px;max-width:480px;">
+    <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#556B2F;font-weight:600;">First Pressing — 2026</span>
+    <h2 data-reveal style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(32px,4vw,56px);line-height:1.15;letter-spacing:-0.01em;color:#FAFAF7;">One harvest.<br>One pressing.<br>Worth the wait.</h2>
+    <p data-reveal style="margin:0;font-size:16px;line-height:1.8;color:rgba(250,250,247,0.6);text-wrap:pretty;">Dark glass to protect what light would ruin. A label that says only what matters. The rest is in the bottle.</p>
+    <div class="specs-row" data-reveal>
+      <div class="spec-item">
+        <span class="spec-value">&gt;400</span>
+        <span class="spec-label">mg/kg Polyphenols</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-value">&lt;0.3%</span>
+        <span class="spec-label">Free Acidity</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-value">Oct '25</span>
+        <span class="spec-label">Harvest Date</span>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- ══════════════════════════════
+     E. PRESS PLACEHOLDER
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Press" style="position:relative;z-index:1;padding:100px clamp(24px,8vw,120px);border-top:1px solid var(--ink-08);text-align:center;">
+  <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--ink-40);font-weight:600;margin-bottom:52px;">As Featured In</span>
+  <div class="press-logos">
+    <span class="press-logo">The New Yorker</span>
+    <span class="press-logo">Monocle</span>
+    <span class="press-logo">Condé Nast Traveller</span>
+    <span class="press-logo">Food &amp; Wine</span>
+    <span class="press-logo">Bon Appétit</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     F. COMING SOON
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Notify" style="position:relative;z-index:1;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;padding:140px 24px;text-align:center;border-top:1px solid var(--ink-08);">
+  <span data-reveal style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;">Coming Soon</span>
+  <h2 data-reveal style="margin:0;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(28px,3.6vw,48px);line-height:1.2;max-width:18ch;color:var(--ink);">Be the first to know when OILIVE launches.</h2>
   <div id="notify-form-wrap" data-reveal>
-    <form id="notify-form" style="display:flex; gap:0; width:min(440px, 90vw); border-bottom:1px solid rgba(26,26,26,0.25);">
-      <input id="notify-email" type="email" placeholder="Your email address" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:'Instrument Sans', sans-serif; font-size:15px; padding:14px 0; color:#1A1A1A;">
-      <button type="submit" style="border:none; cursor:pointer; background:#556B2F; color:#FAFAF7; font-family:'Instrument Sans', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:0 26px; margin:6px 0; transition:background 0.2s;">Notify Me</button>
+    <form id="notify-form" style="display:flex;gap:0;width:min(440px,90vw);border-bottom:1px solid var(--ink-25);">
+      <input id="notify-email" type="email" placeholder="Your email address">
+      <button id="notify-btn" type="submit">Notify Me</button>
     </form>
   </div>
-  <p id="notify-thanks" style="display:none; margin:0; font-size:15px; color:#556B2F; letter-spacing:0.06em;">Thank you. You're on the list.</p>
+  <p id="notify-thanks" style="display:none;margin:0;font-size:15px;color:var(--green);letter-spacing:0.06em;">Thank you. You're on the list.</p>
 </section>
 
-<!-- F. FOOTER -->
-<footer data-screen-label="Footer" style="position:relative; z-index:1; background:#FAFAF7; border-top:1px solid rgba(26,26,26,0.08); padding:48px clamp(24px, 8vw, 120px); box-sizing:border-box; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px;">
-  <img src="assets/oilive-logo.png" alt="Oilive" style="width:92px; height:auto;">
-  <div style="display:flex; gap:28px; font-size:12px; letter-spacing:0.12em; text-transform:uppercase;">
-    <a href="https://www.instagram.com/oilive.co" target="_blank" rel="noopener">Instagram</a>
-    <a href="https://www.facebook.com/profile.php?id=61591957916677" target="_blank" rel="noopener">Facebook</a>
-    <a href="mailto:hello@oilive.co">Contact</a>
+<!-- ══════════════════════════════
+     G. FOOTER
+══════════════════════════════ -->
+<footer class="sec-light" data-screen-label="Footer" style="position:relative;z-index:1;border-top:1px solid var(--ink-08);padding:48px clamp(24px,8vw,120px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;">
+  <img id="footer-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:92px;height:auto;transition:filter 0.4s;">
+  <div style="display:flex;gap:28px;">
+    <a href="https://www.instagram.com/oilive.co" target="_blank" rel="noopener" class="footer-link">Instagram</a>
+    <a href="https://www.facebook.com/profile.php?id=61591957916677" target="_blank" rel="noopener" class="footer-link">Facebook</a>
+    <a href="mailto:hello@oilive.co" class="footer-link">Contact</a>
   </div>
-  <span style="font-size:11px; color:rgba(26,26,26,0.4); letter-spacing:0.08em;">© 2026 Oilive. All rights reserved.</span>
+  <span style="font-size:11px;color:var(--ink-40);letter-spacing:0.08em;">© 2026 OILIVE. All rights reserved.</span>
 </footer>
 
 <script>
 (function () {
-  // --- Email form ---
+
+  /* ══════════════════════════════
+     LOADER
+  ══════════════════════════════ */
+  var loader = document.getElementById('loader');
+  var heroLogo = document.getElementById('hero-logo');
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      loader.classList.add('out');
+      setTimeout(function () { loader.style.display = 'none'; }, 750);
+      if (heroLogo) {
+        heroLogo.style.transition = 'opacity 1.3s ease, transform 1.3s ease';
+        heroLogo.style.transform = 'translateY(14px)';
+        requestAnimationFrame(function () { requestAnimationFrame(function () {
+          heroLogo.style.opacity = '1';
+          heroLogo.style.transform = 'translateY(0)';
+        }); });
+      }
+    }, 1700);
+  });
+
+  /* ══════════════════════════════
+     DARK MODE TOGGLE
+  ══════════════════════════════ */
+  var html = document.documentElement;
+  var toggleBtn = document.getElementById('theme-toggle');
+  var footerLogo = document.getElementById('footer-logo');
+  var saved = localStorage.getItem('oilive-theme') || 'light';
+  html.setAttribute('data-theme', saved);
+  if (footerLogo) footerLogo.style.filter = saved === 'dark' ? 'invert(1) brightness(0.85)' : '';
+  toggleBtn.addEventListener('click', function () {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('oilive-theme', next);
+    if (footerLogo) footerLogo.style.filter = next === 'dark' ? 'invert(1) brightness(0.85)' : '';
+  });
+
+  /* ══════════════════════════════
+     CUSTOM CURSOR
+  ══════════════════════════════ */
+  var cursor = document.getElementById('cursor');
+  var cx = -100, cy = -100, tx = -100, ty = -100;
+  document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
+  (function animCursor() {
+    requestAnimationFrame(animCursor);
+    cx += (tx - cx) * 0.16;
+    cy += (ty - cy) * 0.16;
+    cursor.style.transform = 'translate(' + (cx - cursor.offsetWidth / 2) + 'px,' + (cy - cursor.offsetHeight / 2) + 'px)';
+  })();
+  var hoverTargets = document.querySelectorAll('a, button, input, #bottle-svg');
+  hoverTargets.forEach(function (el) {
+    el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
+    el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
+  });
+
+  /* ══════════════════════════════
+     EMAIL FORM
+  ══════════════════════════════ */
   var form = document.getElementById('notify-form');
   var thanks = document.getElementById('notify-thanks');
   var formWrap = document.getElementById('notify-form-wrap');
@@ -153,32 +526,55 @@
       var emailInput = document.getElementById('notify-email');
       var email = emailInput.value.trim();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        emailInput.style.borderBottom = '1px solid #c0392b';
+        emailInput.style.color = '#c0392b';
         emailInput.placeholder = 'Please enter a valid email address';
-        setTimeout(function () { emailInput.style.borderBottom = ''; emailInput.placeholder = 'Your email address'; }, 2800);
+        setTimeout(function () { emailInput.style.color = ''; emailInput.placeholder = 'Your email address'; }, 2800);
         return;
       }
-      if (email) {
-        formWrap.style.display = 'none';
-        thanks.style.display = 'block';
-      }
+      /* TODO: POST to Mailchimp / ConvertKit / Resend endpoint */
+      formWrap.style.display = 'none';
+      thanks.style.display = 'block';
     });
   }
 
-  // --- Three.js + GSAP init (waits for libs to load) ---
-  var _raf = 0;
-  var _renderer, _three, _scroll, _isMobile, _basePos;
+  /* ══════════════════════════════
+     MOUSE PARALLAX (bottle)
+  ══════════════════════════════ */
+  var mouseNX = 0, mouseNY = 0;
+  document.addEventListener('mousemove', function (e) {
+    mouseNX = (e.clientX / window.innerWidth  - 0.5) * 2;
+    mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  /* ══════════════════════════════
+     LENIS SMOOTH SCROLL
+  ══════════════════════════════ */
+  var lenis = null;
+  function initLenis() {
+    if (!window.Lenis) return;
+    lenis = new window.Lenis({ lerp: 0.1, smoothWheel: true });
+    (function lenisRaf(t) { lenis.raf(t); requestAnimationFrame(lenisRaf); })(0);
+  }
+
+  /* ══════════════════════════════
+     WAIT FOR LIBS
+  ══════════════════════════════ */
+  var _isMobile, _basePos, _scroll, _renderer, _three;
 
   function waitLibs() {
     if (window.THREE && window.gsap && window.ScrollTrigger) {
-      try { initThree(); } catch (err) { console.warn('3D scene disabled:', err); }
-      try { initScroll(); } catch (err) { console.warn('Scroll animations disabled:', err); }
+      initLenis();
+      try { initThree(); } catch (err) { console.warn('3D disabled:', err); }
+      try { initScroll(); } catch (err) { console.warn('Scroll disabled:', err); }
     } else {
       setTimeout(waitLibs, 120);
     }
   }
   waitLibs();
 
+  /* ══════════════════════════════
+     THREE.JS
+  ══════════════════════════════ */
   function initThree() {
     var THREE = window.THREE;
     var canvas = document.getElementById('oilive-canvas');
@@ -196,11 +592,9 @@
 
     scene.add(new THREE.AmbientLight(0xfaf9f0, 0.55));
     var key = new THREE.DirectionalLight(0xfffbe8, 1.15);
-    key.position.set(3, 4, 5);
-    scene.add(key);
+    key.position.set(3, 4, 5); scene.add(key);
     var rim = new THREE.DirectionalLight(0x9db87a, 0.7);
-    rim.position.set(-4, -2, -3);
-    scene.add(rim);
+    rim.position.set(-4, -2, -3); scene.add(rim);
 
     var geo = new THREE.SphereGeometry(1, isMobile ? 40 : 72, isMobile ? 40 : 72);
     _basePos = geo.attributes.position.array.slice();
@@ -211,17 +605,12 @@
     cctx.fillStyle = '#556B2F';
     cctx.fillRect(0, 0, 256, 256);
     for (var i = 0; i < 240; i++) {
-      var shade = Math.random();
-      cctx.fillStyle = shade > 0.5 ? 'rgba(31,59,31,0.16)' : 'rgba(139,158,84,0.13)';
-      cctx.beginPath();
-      cctx.arc(Math.random() * 256, Math.random() * 256, 4 + Math.random() * 16, 0, 7);
-      cctx.fill();
+      cctx.fillStyle = Math.random() > 0.5 ? 'rgba(31,59,31,0.16)' : 'rgba(139,158,84,0.13)';
+      cctx.beginPath(); cctx.arc(Math.random()*256, Math.random()*256, 4+Math.random()*16, 0, 7); cctx.fill();
     }
     for (var j = 0; j < 900; j++) {
       cctx.fillStyle = 'rgba(26,26,26,0.07)';
-      cctx.beginPath();
-      cctx.arc(Math.random() * 256, Math.random() * 256, 0.4 + Math.random() * 1.1, 0, 7);
-      cctx.fill();
+      cctx.beginPath(); cctx.arc(Math.random()*256, Math.random()*256, 0.4+Math.random()*1.1, 0, 7); cctx.fill();
     }
     var colTex = new THREE.CanvasTexture(colC);
     colTex.wrapS = colTex.wrapT = THREE.RepeatWrapping;
@@ -230,27 +619,19 @@
     var bmpC = document.createElement('canvas');
     bmpC.width = bmpC.height = 256;
     var bctx = bmpC.getContext('2d');
-    bctx.fillStyle = '#808080';
-    bctx.fillRect(0, 0, 256, 256);
+    bctx.fillStyle = '#808080'; bctx.fillRect(0, 0, 256, 256);
     for (var k = 0; k < 2600; k++) {
-      var g = 90 + (Math.random() * 100 | 0);
-      bctx.fillStyle = 'rgb(' + g + ',' + g + ',' + g + ')';
-      bctx.beginPath();
-      bctx.arc(Math.random() * 256, Math.random() * 256, 0.4 + Math.random() * 1.6, 0, 7);
-      bctx.fill();
+      var g = 90 + (Math.random()*100|0);
+      bctx.fillStyle = 'rgb('+g+','+g+','+g+')';
+      bctx.beginPath(); bctx.arc(Math.random()*256, Math.random()*256, 0.4+Math.random()*1.6, 0, 7); bctx.fill();
     }
     var bumpTex = new THREE.CanvasTexture(bmpC);
     bumpTex.wrapS = bumpTex.wrapT = THREE.RepeatWrapping;
     bumpTex.repeat.set(3, 3);
 
     var mat = new THREE.MeshPhysicalMaterial({
-      map: colTex,
-      bumpMap: bumpTex,
-      bumpScale: 0.02,
-      roughness: 0.32,
-      metalness: 0.0,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.25
+      map: colTex, bumpMap: bumpTex, bumpScale: 0.02,
+      roughness: 0.32, metalness: 0.0, clearcoat: 0.85, clearcoatRoughness: 0.25
     });
     var drop = new THREE.Mesh(geo, mat);
     drop.scale.set(1.05, 1.35, 1.05);
@@ -267,90 +648,124 @@
 
     var v = new THREE.Vector3();
     var clock = new THREE.Clock();
-    function tick() {
-      _raf = requestAnimationFrame(tick);
+    (function tick() {
+      requestAnimationFrame(tick);
       var t = clock.getElapsedTime();
-      var pos = geo.attributes.position;
-      var base = _basePos;
+      var pos = geo.attributes.position, base = _basePos;
       for (var i = 0; i < pos.count; i++) {
-        v.set(base[i * 3], base[i * 3 + 1], base[i * 3 + 2]);
-        var n = 0.045 * Math.sin(v.x * 3.1 + t * 0.8) * Math.sin(v.y * 2.3 + t * 0.6) + 0.03 * Math.sin(v.z * 4.2 + t * 0.5);
-        v.multiplyScalar(1 + n);
+        v.set(base[i*3], base[i*3+1], base[i*3+2]);
+        var n = 0.045*Math.sin(v.x*3.1+t*0.8)*Math.sin(v.y*2.3+t*0.6) + 0.03*Math.sin(v.z*4.2+t*0.5);
+        v.multiplyScalar(1+n);
         pos.setXYZ(i, v.x, v.y, v.z);
       }
       pos.needsUpdate = true;
       geo.computeVertexNormals();
-
-      drop.rotation.y = t * 0.12 + _scroll.rotY;
-      drop.rotation.z = 0.12 * Math.sin(t * 0.3);
+      drop.rotation.y = t*0.12 + _scroll.rotY;
+      drop.rotation.z = 0.12*Math.sin(t*0.3);
       drop.position.x = _scroll.x;
-      drop.position.y = _scroll.y + 0.05 * Math.sin(t * 0.7);
+      drop.position.y = _scroll.y + 0.05*Math.sin(t*0.7);
       var s = _scroll.scale;
-      drop.scale.set(1.05 * s, 1.35 * s, 1.05 * s);
+      drop.scale.set(1.05*s, 1.35*s, 1.05*s);
       renderer.render(scene, camera);
-    }
-    tick();
+    })();
   }
 
+  /* ══════════════════════════════
+     GSAP SCROLL ANIMATIONS
+  ══════════════════════════════ */
   function initScroll() {
     var gsap = window.gsap;
     gsap.registerPlugin(window.ScrollTrigger);
 
+    /* Connect Lenis → ScrollTrigger */
+    if (lenis) {
+      lenis.on('scroll', window.ScrollTrigger.update);
+      gsap.ticker.lagSmoothing(0);
+    }
+
+    /* 3D object scroll binding */
     if (_scroll) {
       gsap.to(_scroll, {
         rotY: 2.6,
-        scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'bottom top', scrub: 1 }
+        scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'bottom top', scrub:1 }
       });
       gsap.fromTo(_scroll, { x: _isMobile ? 0 : 1.35 }, {
         x: _isMobile ? 0 : 1.7,
-        scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'top top', scrub: 1 }
+        scrollTrigger: { trigger:"[data-screen-label='Story']", start:'top bottom', end:'top top', scrub:1 }
       });
       if (_isMobile) {
-        gsap.to(_scroll, {
-          y: 0,
-          scrollTrigger: { trigger: "[data-screen-label='Story']", start: 'top bottom', end: 'center center', scrub: 1 }
-        });
+        gsap.to(_scroll, { y:0, scrollTrigger:{ trigger:"[data-screen-label='Story']", start:'top bottom', end:'center center', scrub:1 } });
       }
       gsap.to(_scroll, {
-        scale: 0,
-        ease: 'power2.in',
-        scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 90%', end: 'top 30%', scrub: 1 }
+        scale: 0, ease:'power2.in',
+        scrollTrigger: { trigger:"[data-screen-label='Process']", start:'top 90%', end:'top 30%', scrub:1 }
       });
     }
 
-    gsap.fromTo('[data-word]', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.18, delay: 0.9, ease: 'power2.out' });
+    /* Hero wordmark */
+    gsap.fromTo('[data-word]', { opacity:0, y:14 }, { opacity:1, y:0, duration:0.9, stagger:0.18, delay:2.0, ease:'power2.out' });
 
+    /* Reveal elements */
     document.querySelectorAll('[data-reveal]').forEach(function (el) {
-      gsap.fromTo(el, { opacity: 0, y: 28 }, {
-        opacity: 1, y: 0, duration: 1, ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 85%' }
+      gsap.fromTo(el, { opacity:0, y:28 }, {
+        opacity:1, y:0, duration:1, ease:'power2.out',
+        scrollTrigger: { trigger:el, start:'top 85%' }
       });
     });
 
-    gsap.fromTo('[data-process-fill]', { scaleX: 0 }, {
-      scaleX: 1, ease: 'none',
-      scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 60%', end: 'bottom 80%', scrub: 1 }
+    /* Process line fill */
+    gsap.fromTo('[data-process-fill]', { scaleX:0 }, {
+      scaleX:1, ease:'none',
+      scrollTrigger: { trigger:"[data-screen-label='Process']", start:'top 60%', end:'bottom 55%', scrub:1 }
     });
 
-    document.querySelectorAll('[data-step-dot]').forEach(function (dot) {
+    /* Process steps — staggered sequential reveal */
+    document.querySelectorAll('.process-step').forEach(function (el, i) {
+      gsap.to(el, {
+        opacity:1, y:0, duration:0.75, ease:'power2.out',
+        scrollTrigger: { trigger:"[data-screen-label='Process']", start:'top ' + (62 - i*7) + '%' }
+      });
+    });
+
+    /* Step dots activate with process line progress */
+    document.querySelectorAll('[data-step-dot]').forEach(function (dot, i) {
       gsap.to(dot, {
-        backgroundColor: '#556B2F', borderColor: '#556B2F', duration: 0.4,
-        scrollTrigger: { trigger: dot, start: 'top 70%' }
+        backgroundColor:'#556B2F', borderColor:'#556B2F', duration:0.3,
+        scrollTrigger: { trigger:"[data-screen-label='Process']", start:'top ' + (58 - i*7) + '%' }
       });
     });
 
-    document.querySelectorAll('[data-step]').forEach(function (el, i) {
-      gsap.fromTo(el, { opacity: 0, y: 24 }, {
-        opacity: 1, y: 0, duration: 0.8, delay: i * 0.12, ease: 'power2.out',
-        scrollTrigger: { trigger: "[data-screen-label='Process']", start: 'top 65%' }
-      });
+    /* Bottle scroll parallax */
+    gsap.fromTo('#bottle-svg', { rotation:-6, y:40 }, {
+      rotation:3, y:-20, ease:'none',
+      scrollTrigger: { trigger:"[data-screen-label='Product']", start:'top bottom', end:'bottom top', scrub:1 }
     });
 
-    gsap.fromTo('[data-bottle]', { rotation: -6, y: 40 }, {
-      rotation: 3, y: -20, ease: 'none',
-      scrollTrigger: { trigger: "[data-screen-label='Product']", start: 'top bottom', end: 'bottom top', scrub: 1 }
+    /* Bottle mouse parallax (desktop only) */
+    if (!_isMobile) {
+      var bottleSvg = document.getElementById('bottle-svg');
+      var productSec = document.querySelector("[data-screen-label='Product']");
+      if (bottleSvg && productSec) {
+        gsap.ticker.add(function () {
+          var rect = productSec.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            gsap.to(bottleSvg, {
+              rotateY: mouseNX * 20,
+              rotateX: -mouseNY * 12,
+              duration: 1.4, ease:'power2.out', overwrite:'auto'
+            });
+          }
+        });
+      }
+    }
+
+    /* Press logos stagger */
+    gsap.to('.press-logo', {
+      opacity:1, y:0, duration:0.7, stagger:0.1, ease:'power2.out',
+      scrollTrigger: { trigger:"[data-screen-label='Press']", start:'top 80%' }
     });
   }
+
 })();
 </script>
 </body>

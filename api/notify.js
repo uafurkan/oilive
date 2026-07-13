@@ -80,7 +80,7 @@ const welcomeEmailHtml = `
   <table role="presentation" width="100%" bgcolor="#ffffff" class="oilive-card" style="max-width:480px;margin:0 auto;background:#ffffff;border:1px solid #1A1A1A14;border-radius:4px;">
     <tr>
       <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:48px 32px 8px;background:#ffffff;">
-        <img src="https://oilives.vercel.app/assets/oilive-logo.png" width="150" alt="Oilive" style="display:inline-block;height:auto;">
+        <img src="https://oilives.vercel.app/assets/oilive-logo-email.png" width="170" alt="Oilive" style="display:inline-block;height:auto;background:#ffffff;">
       </td>
     </tr>
     <tr>

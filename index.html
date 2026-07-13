@@ -81,7 +81,7 @@
     #cursor {
       position: fixed;
       top: 0; left: 0;
-      width: 16px; height: 20px;
+      width: 17px; height: 22px;
       pointer-events: none;
       z-index: 9999;
       will-change: transform;
@@ -89,15 +89,27 @@
     #cursor svg {
       display: block;
       overflow: visible;
-      transform-origin: 50% 60%;
+      transform-origin: 50% 72%;
       transition: transform 0.25s cubic-bezier(.2,.8,.3,1);
     }
     #cursor.hovering svg { transform: scale(1.4); }
-    #cursor.pressed svg { transform: scale(0.7,1.2); }
-    #cursor.hovering.pressed svg { transform: scale(1.05,1.3); }
+    /* pressed = squashed olive: flattens down and bulges sideways */
+    #cursor.pressed svg { transform: scale(1.35, 0.6); }
+    #cursor.hovering.pressed svg { transform: scale(1.55, 0.75); }
     #cursor .olive-body { fill: var(--green); transition: fill 0.4s; }
     #cursor .olive-stem { fill: var(--green-d); transition: fill 0.4s; }
+    #cursor .olive-leaf { fill: var(--green); opacity: 0.8; transition: fill 0.4s; }
+    #cursor .olive-shade { fill: rgba(0,0,0,0.16); }
     #cursor .olive-shine { fill: rgba(255,255,255,0.4); }
+    #cursor .olive-shine2 { fill: rgba(255,255,255,0.22); }
+    /* Oil droplets squirting from the squashed olive on click */
+    .oil-drop {
+      position: fixed; top: 0; left: 0;
+      border-radius: 46% 54% 60% 60% / 40% 40% 62% 62%;
+      background: radial-gradient(circle at 35% 28%, #EBCB6F 0%, #CBA22A 55%, #9C7B14 100%);
+      pointer-events: none; z-index: 9998;
+      will-change: transform, opacity;
+    }
 
     /* ─── Loader ─── */
     #loader {
@@ -380,10 +392,13 @@
 
 <!-- Custom cursor -->
 <div id="cursor">
-  <svg viewBox="0 0 20 26" width="16" height="20">
-    <rect class="olive-stem" x="8.4" y="0" width="3.2" height="6" rx="1.6"/>
-    <ellipse class="olive-body" cx="10" cy="15.5" rx="8" ry="10"/>
-    <ellipse class="olive-shine" cx="7" cy="10.8" rx="2.2" ry="3"/>
+  <svg viewBox="0 0 22 28" width="17" height="22">
+    <path class="olive-stem" d="M11.2 7.2 C 10.5 4.8 10.9 2.5 12.6 0.5 L 13.9 1.6 C 12.5 3.2 12.2 5 12.8 7.2 Z"/>
+    <ellipse class="olive-leaf" cx="16" cy="3.4" rx="3.9" ry="1.55" transform="rotate(-26 16 3.4)"/>
+    <path class="olive-body" d="M11 6.7 C 15.7 6.7 18.9 10.7 18.9 16.5 C 18.9 22.7 15.3 27.2 11 27.2 C 6.7 27.2 3.1 22.7 3.1 16.5 C 3.1 10.7 6.3 6.7 11 6.7 Z"/>
+    <path class="olive-shade" d="M13.6 7.5 C 16.9 9.2 18.9 12.4 18.9 16.5 C 18.9 22.7 15.3 27.2 11 27.2 C 14 24.7 15.6 21 15.6 16.5 C 15.6 12.8 14.9 9.8 13.6 7.5 Z"/>
+    <ellipse class="olive-shine" cx="7.7" cy="12" rx="2" ry="3.4" transform="rotate(12 7.7 12)"/>
+    <ellipse class="olive-shine2" cx="9.6" cy="17.6" rx="0.85" ry="1.3"/>
   </svg>
 </div>
 
@@ -795,7 +810,41 @@
     el.addEventListener('mouseenter', function () { cursor.classList.add('hovering'); });
     el.addEventListener('mouseleave', function () { cursor.classList.remove('hovering'); });
   });
-  document.addEventListener('mousedown', function () { cursor.classList.add('pressed'); });
+  /* Squashing the olive squirts a few drops of oil — small golden
+     droplets with a sideways burst that arc down under gravity */
+  function squirtOil(x, y) {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    for (var i = 0; i < 6; i++) {
+      (function () {
+        var d = document.createElement('div');
+        d.className = 'oil-drop';
+        var s = 2.5 + Math.random() * 3;
+        d.style.width = s + 'px';
+        d.style.height = (s * 1.3) + 'px';
+        d.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        document.body.appendChild(d);
+        var vx = (Math.random() * 2 - 1) * 80;
+        var vy = 15 + Math.random() * 55;
+        var life = 0.5 + Math.random() * 0.3;
+        var t0 = null;
+        function step(ts) {
+          if (t0 === null) t0 = ts;
+          var t = (ts - t0) / 1000;
+          if (t >= life) { if (d.parentNode) d.parentNode.removeChild(d); return; }
+          var k = t / life;
+          d.style.opacity = 0.9 * (1 - k * k);
+          d.style.transform = 'translate(' + (x + vx * t) + 'px,' +
+            (y + vy * t + 300 * t * t) + 'px) scaleY(' + (1 + k * 0.8) + ')';
+          requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      })();
+    }
+  }
+  document.addEventListener('mousedown', function () {
+    cursor.classList.add('pressed');
+    squirtOil(cx, cy + 8);
+  });
   document.addEventListener('mouseup', function () { cursor.classList.remove('pressed'); });
 
   /* ══════════════════════════════

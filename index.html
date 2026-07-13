@@ -1067,7 +1067,7 @@
     if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
     labelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     var label = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.9, 1.1),
+      new THREE.PlaneGeometry(0.78, 1.1),
       new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.75 })
     );
     label.position.set(0, 1.15, 0.72);
@@ -1075,6 +1075,7 @@
     var group = new THREE.Group();
     group.add(body, cap, label);
     group.position.y = -1.5;
+    group.scale.setScalar(0.93);
     scene.add(group);
 
     function resize() {

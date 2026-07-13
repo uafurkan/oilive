@@ -24,10 +24,10 @@ export default async function handler(req, res) {
 
     if (!resp.ok) {
       const detail = await resp.json().catch(() => ({}));
-      if (resp.status === 409 || detail.name === 'validation_error') {
-        return res.status(200).json({ ok: true, already: true });
+      const alreadyRegistered = resp.status === 409 || detail.name === 'validation_error';
+      if (!alreadyRegistered) {
+        return res.status(502).json({ error: 'Upstream error' });
       }
-      return res.status(502).json({ error: 'Upstream error' });
     }
 
     fetch('https://api.resend.com/emails', {

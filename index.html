@@ -1102,14 +1102,25 @@
         bottleVisible = entries[0].isIntersecting;
       }, { rootMargin: '200px 0px' }).observe(canvas);
     }
+    /* The glass material's transmission pass makes every render of this
+       scene expensive, so only re-render on frames where the bottle
+       actually moved — identical output, a fraction of the GPU work
+       (on touch devices that means renders happen only mid-scroll) */
+    var lastRY = null, lastRX = null, lastRZ = null;
     (function tick() {
       requestAnimationFrame(tick);
       if (!bottleVisible) return;
       mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
       my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
-      group.rotation.y = 0.4 + mx * 0.55;
-      group.rotation.x = -my * 0.22;
-      group.rotation.z = tilt.sway;
+      var ry = 0.4 + mx * 0.55, rx = -my * 0.22, rz = tilt.sway;
+      if (lastRY !== null &&
+          Math.abs(ry - lastRY) < 0.0005 &&
+          Math.abs(rx - lastRX) < 0.0005 &&
+          Math.abs(rz - lastRZ) < 0.0005) return;
+      lastRY = ry; lastRX = rx; lastRZ = rz;
+      group.rotation.y = ry;
+      group.rotation.x = rx;
+      group.rotation.z = rz;
       renderer.render(scene, camera);
     })();
 

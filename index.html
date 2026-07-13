@@ -881,9 +881,22 @@
         setTimeout(function () { emailInput.style.color = ''; emailInput.placeholder = 'Your email address'; }, 2800);
         return;
       }
-      /* TODO: POST to Mailchimp / ConvertKit / Resend endpoint */
-      formWrap.style.display = 'none';
-      thanks.style.display = 'block';
+      var submitBtn = document.getElementById('notify-btn');
+      submitBtn.disabled = true;
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('failed');
+        formWrap.style.display = 'none';
+        thanks.style.display = 'block';
+      }).catch(function () {
+        submitBtn.disabled = false;
+        emailInput.style.color = '#c0392b';
+        emailInput.placeholder = 'Something went wrong, try again';
+        setTimeout(function () { emailInput.style.color = ''; emailInput.placeholder = 'Your email address'; }, 2800);
+      });
     });
   }
 

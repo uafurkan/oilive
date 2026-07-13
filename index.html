@@ -1018,10 +1018,29 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    /* The droplet canvas sits behind the page; every section from
+       Origin down has an opaque background, so the droplet is only
+       actually visible over Hero and Story. Skip the whole loop
+       (CPU vertex morph + normals + fullscreen render) once both
+       have scrolled out — this is what was tanking FPS lower down */
+    var dropVisible = true;
+    if (window.IntersectionObserver) {
+      var visSections = { hero: true, story: true };
+      [['hero', "[data-screen-label='Hero']"], ['story', "[data-screen-label='Story']"]].forEach(function (p) {
+        var el = document.querySelector(p[1]);
+        if (!el) return;
+        new IntersectionObserver(function (entries) {
+          visSections[p[0]] = entries[0].isIntersecting;
+          dropVisible = visSections.hero || visSections.story;
+        }, { rootMargin: '100px 0px' }).observe(el);
+      });
+    }
+
     var v = new THREE.Vector3();
     var clock = new THREE.Clock();
     (function tick() {
       requestAnimationFrame(tick);
+      if (!dropVisible) return;
       var t = clock.getElapsedTime();
       var pos = geo.attributes.position, base = _basePos;
       for (var i = 0; i < pos.count; i++) {

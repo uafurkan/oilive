@@ -1007,7 +1007,10 @@
 
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(24, 1, 0.1, 20);
-    camera.position.set(0, 0.05, 8.2);
+    /* z pushed back so the narrow canvas frustum is wider than the
+       bottle body + sway tilt — at 8.2 the glass edge was literally
+       cropped by the canvas edge and read as a flat "wall" */
+    camera.position.set(0, 0.05, 10.5);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.45));
     var key = new THREE.DirectionalLight(0xfff2d8, 1.3);

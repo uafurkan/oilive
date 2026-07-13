@@ -364,6 +364,11 @@
     }
     #notify-btn:hover { background: var(--green-d); }
 
+    /* iOS Safari auto-zooms on input focus when font-size < 16px */
+    @media (max-width: 720px) {
+      #notify-email { font-size: 16px; }
+    }
+
     /* ─── Footer links ─── */
     .footer-link {
       color: var(--ink); font-size: 12px;

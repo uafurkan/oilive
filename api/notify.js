@@ -30,8 +30,66 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Upstream error' });
     }
 
+    fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'OILIVE <onboarding@resend.dev>',
+        to: email,
+        subject: "You're on the list.",
+        html: welcomeEmailHtml,
+      }),
+    }).catch(function () {});
+
     return res.status(200).json({ ok: true });
   } catch (err) {
     return res.status(500).json({ error: 'Server error' });
   }
 }
+
+const welcomeEmailHtml = `
+<div style="background:#FAFAF7;padding:56px 24px;font-family:Georgia,'Times New Roman',serif;">
+  <table role="presentation" width="100%" style="max-width:480px;margin:0 auto;">
+    <tr>
+      <td style="text-align:center;padding-bottom:36px;">
+        <span style="font-size:22px;letter-spacing:0.08em;color:#1A1A1A;">
+          <span style="color:#556B2F;">O</span>ilive
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center;padding-bottom:28px;">
+        <p style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#556B2F;font-weight:600;margin:0;">
+          Coming Soon
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center;padding-bottom:24px;">
+        <p style="font-size:26px;line-height:1.4;color:#1A1A1A;margin:0;">
+          Something green is coming.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center;padding-bottom:36px;">
+        <p style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.7;color:#1A1A1A99;margin:0;">
+          Thank you for joining the list. You'll be the first to know<br>
+          when our first pressing arrives &mdash; a single-estate, cold-extracted<br>
+          olive oil from the Aegean coast of Turkey.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center;">
+        <p style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#1A1A1A66;margin:0;">
+          &mdash; The Oilive Team
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+`;

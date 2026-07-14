@@ -1,67 +1,97 @@
+const RESEND_API = 'https://api.resend.com';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const FROM_ADDRESS = 'OILIVE <onboarding@resend.dev>';
+const WELCOME_SUBJECT = "You're on the list.";
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email } = req.body || {};
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  const raw = req.body?.email;
+  const email = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  if (!EMAIL_PATTERN.test(email)) {
     return res.status(400).json({ error: 'Invalid email' });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const headers = {
+    Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+    'Content-Type': 'application/json',
+  };
   const audienceId = process.env.RESEND_AUDIENCE_ID;
 
   try {
-    const resp = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, unsubscribed: false }),
-    });
-
-    if (!resp.ok) {
-      const detail = await resp.json().catch(() => ({}));
-      const alreadyRegistered = resp.status === 409 || detail.name === 'validation_error';
-      if (!alreadyRegistered) {
-        return res.status(502).json({ error: 'Upstream error' });
-      }
+    const subscribed = await addToAudience(headers, audienceId, email);
+    if (!subscribed) {
+      return res.status(502).json({ error: 'Upstream error' });
     }
 
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'OILIVE <onboarding@resend.dev>',
-        to: email,
-        subject: "You're on the list.",
-        html: welcomeEmailHtml,
-      }),
-    }).catch(function () {});
-
-    let position = null;
-    try {
-      const listResp = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      });
-      if (listResp.ok) {
-        const listData = await listResp.json();
-        if (Array.isArray(listData.data)) position = listData.data.length;
-      }
-    } catch (err) {}
+    // Independent calls: the welcome email must not delay (or be delayed by)
+    // the waitlist-position lookup, so run them in parallel.
+    const [, position] = await Promise.all([
+      sendWelcomeEmail(headers, email),
+      getWaitlistPosition(headers, audienceId),
+    ]);
 
     return res.status(200).json({ ok: true, position });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Server error' });
   }
 }
 
-const welcomeEmailHtml = `
+/**
+ * Adds the contact to the Resend audience.
+ * Returns true when the contact is in the audience after the call —
+ * including the case where it was already registered.
+ */
+async function addToAudience(headers, audienceId, email) {
+  const resp = await fetch(`${RESEND_API}/audiences/${audienceId}/contacts`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email, unsubscribed: false }),
+  });
+  if (resp.ok) return true;
+
+  const detail = await resp.json().catch(() => ({}));
+  return resp.status === 409 || detail.name === 'validation_error';
+}
+
+/**
+ * Sends the branded welcome email. Failures are deliberately swallowed:
+ * a missing email must never surface as a failed signup.
+ */
+function sendWelcomeEmail(headers, email) {
+  return fetch(`${RESEND_API}/emails`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      from: FROM_ADDRESS,
+      to: email,
+      subject: WELCOME_SUBJECT,
+      html: WELCOME_EMAIL_HTML,
+    }),
+  }).catch(() => null);
+}
+
+/**
+ * Returns the contact's position on the waitlist (current audience size),
+ * or null when it can't be determined — the caller treats null as "omit".
+ */
+async function getWaitlistPosition(headers, audienceId) {
+  try {
+    const resp = await fetch(`${RESEND_API}/audiences/${audienceId}/contacts`, {
+      headers: { Authorization: headers.Authorization },
+    });
+    if (!resp.ok) return null;
+    const { data } = await resp.json();
+    return Array.isArray(data) ? data.length : null;
+  } catch {
+    return null;
+  }
+}
+
+const WELCOME_EMAIL_HTML = `
 <!DOCTYPE html>
 <html>
 <head>

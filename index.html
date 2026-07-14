@@ -397,7 +397,9 @@
        section (fixed) but below the cursor, and never intercepts clicks. */
     #grain {
       position: fixed;
-      inset: -80px;
+      /* -10% viewport margin: keeps the drifting texture's edges out of
+         frame even at the widest translate offsets in grainShift */
+      inset: -10%;
       z-index: 9000;
       pointer-events: none;
       opacity: 0.035;
@@ -953,6 +955,21 @@
     });
   });
 
+  /* Coalesces bursts of scroll/resize events into at most one call of
+     fn per animation frame; also runs fn once immediately so the UI is
+     correct before the first event fires. */
+  function bindFrameThrottled(fn) {
+    var queued = false;
+    function request() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () { queued = false; fn(); });
+    }
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    fn();
+  }
+
   /* ══════════════════════════════
      MINI HEADER LOGO — fades in at top-center once the
      hero logo scrolls out of view; fades back out (and the
@@ -960,24 +977,12 @@
   ══════════════════════════════ */
   if (miniLogoLayers.length && heroLogo) {
     var miniShown = false;
-    var miniLogoTicking = false;
-    function updateMiniLogo() {
-      miniLogoTicking = false;
-      var heroBottom = heroLogo.getBoundingClientRect().bottom;
-      var show = heroBottom < 60;
-      if (show !== miniShown) {
-        miniShown = show;
-        miniLogoLayers.forEach(function (l) { l.classList.toggle('on', show); });
-      }
-    }
-    function requestMiniLogoUpdate() {
-      if (miniLogoTicking) return;
-      miniLogoTicking = true;
-      requestAnimationFrame(updateMiniLogo);
-    }
-    window.addEventListener('scroll', requestMiniLogoUpdate, { passive: true });
-    window.addEventListener('resize', requestMiniLogoUpdate);
-    updateMiniLogo();
+    bindFrameThrottled(function () {
+      var show = heroLogo.getBoundingClientRect().bottom < 60;
+      if (show === miniShown) return;
+      miniShown = show;
+      miniLogoLayers.forEach(function (l) { l.classList.toggle('on', show); });
+    });
   }
 
   /* ══════════════════════════════
@@ -985,22 +990,12 @@
   ══════════════════════════════ */
   var scrollFill = document.getElementById('scroll-progress-fill');
   if (scrollFill) {
-    var scrollTicking = false;
-    function updateScrollProgress() {
-      scrollTicking = false;
+    bindFrameThrottled(function () {
       var doc = document.documentElement;
       var max = doc.scrollHeight - doc.clientHeight;
       var progress = max > 0 ? Math.min(1, Math.max(0, doc.scrollTop / max)) : 0;
       scrollFill.style.transform = 'scaleY(' + progress + ')';
-    }
-    function requestScrollProgressUpdate() {
-      if (scrollTicking) return;
-      scrollTicking = true;
-      requestAnimationFrame(updateScrollProgress);
-    }
-    window.addEventListener('scroll', requestScrollProgressUpdate, { passive: true });
-    window.addEventListener('resize', requestScrollProgressUpdate);
-    updateScrollProgress();
+    });
   }
 
   /* ══════════════════════════════
@@ -1081,17 +1076,36 @@
   var thanks = document.getElementById('notify-thanks');
   var formWrap = document.getElementById('notify-form-wrap');
   if (form) {
+    var emailInput = document.getElementById('notify-email');
+    var submitBtn = document.getElementById('notify-btn');
+    var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    /* Inline error UX: the message lives in the placeholder for 2.8s,
+       then the field quietly resets — no layout shift, no extra element */
+    function flashError(message) {
+      emailInput.style.color = '#c0392b';
+      emailInput.placeholder = message;
+      setTimeout(function () {
+        emailInput.style.color = '';
+        emailInput.placeholder = 'Your email address';
+      }, 2800);
+    }
+
+    function showThanks(position) {
+      if (position) {
+        thanks.textContent = "Thank you. You're #" + position + " on the list.";
+      }
+      formWrap.style.display = 'none';
+      thanks.style.display = 'block';
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var emailInput = document.getElementById('notify-email');
       var email = emailInput.value.trim();
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        emailInput.style.color = '#c0392b';
-        emailInput.placeholder = 'Please enter a valid email address';
-        setTimeout(function () { emailInput.style.color = ''; emailInput.placeholder = 'Your email address'; }, 2800);
+      if (!EMAIL_PATTERN.test(email)) {
+        flashError('Please enter a valid email address');
         return;
       }
-      var submitBtn = document.getElementById('notify-btn');
       submitBtn.disabled = true;
       fetch('/api/notify', {
         method: 'POST',
@@ -1101,16 +1115,10 @@
         if (!r.ok) throw new Error('failed');
         return r.json().catch(function () { return {}; });
       }).then(function (data) {
-        if (data && data.position) {
-          thanks.textContent = "Thank you. You're #" + data.position + " on the list.";
-        }
-        formWrap.style.display = 'none';
-        thanks.style.display = 'block';
+        showThanks(data && data.position);
       }).catch(function () {
         submitBtn.disabled = false;
-        emailInput.style.color = '#c0392b';
-        emailInput.placeholder = 'Something went wrong, try again';
-        setTimeout(function () { emailInput.style.color = ''; emailInput.placeholder = 'Your email address'; }, 2800);
+        flashError('Something went wrong, try again');
       });
     });
   }

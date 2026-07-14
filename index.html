@@ -75,6 +75,12 @@
     ::selection { background: var(--green); color: #FAFAF7; }
     input::placeholder { color: var(--ink-40); }
     @media (pointer: coarse) { body { cursor: auto; } #cursor { display: none !important; } }
+    .oilive-logo-protect {
+      -webkit-user-select: none; user-select: none;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      pointer-events: auto;
+    }
     @media (max-width: 720px) { #bottle-canvas { max-width: 140px; } }
 
     /* ─── Cursor ─── */
@@ -627,13 +633,13 @@
 
 <!-- Page loader -->
 <div id="loader">
-  <img id="loader-logo" src="assets/oilive-logo.png" alt="OILIVE">
+  <img id="loader-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE">
 </div>
 
 <!-- Dark mode toggle -->
 <a id="collection-nav" href="collection.html">Collection</a>
-<img id="mini-logo-letters" class="mini-logo-layer" src="assets/logo-layer-letters.png" alt="">
-<img id="mini-logo-o" class="mini-logo-layer" src="assets/logo-layer-o.png" alt="OILIVE">
+<img id="mini-logo-letters" class="mini-logo-layer oilive-logo-protect" src="assets/logo-layer-letters.png" alt="">
+<img id="mini-logo-o" class="mini-logo-layer oilive-logo-protect" src="assets/logo-layer-o.png" alt="OILIVE">
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <!-- Back-to-top leaf: breaks free on click, flutters up, and settles
@@ -653,7 +659,7 @@
      A. HERO
 ══════════════════════════════ -->
 <section data-screen-label="Hero" style="position:relative;z-index:1;color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;transition:color 0.5s;">
-  <img id="hero-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:min(560px,74vw);height:auto;opacity:0;transition:filter 0.4s;">
+  <img id="hero-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE" style="width:min(560px,74vw);height:auto;opacity:0;transition:filter 0.4s;">
   <p style="margin:44px 0 0;font-size:13px;font-weight:500;letter-spacing:0.42em;text-transform:uppercase;color:var(--ink);display:flex;gap:0.42em;flex-wrap:wrap;justify-content:center;">
     <span data-word style="display:inline-block;opacity:0;">Something</span>
     <span data-word style="display:inline-block;opacity:0;color:var(--green);">green</span>
@@ -959,7 +965,7 @@
      G. FOOTER
 ══════════════════════════════ -->
 <footer class="sec-light" data-screen-label="Footer" style="position:relative;z-index:1;border-top:1px solid var(--ink-08);padding:48px clamp(24px,8vw,120px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;">
-  <img id="footer-logo" src="assets/oilive-logo.png" alt="OILIVE" style="width:92px;height:auto;transition:filter 0.4s;">
+  <img id="footer-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE" style="width:92px;height:auto;transition:filter 0.4s;">
   <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:28px;">
       <a href="collection.html" class="footer-link">Collection</a>
@@ -977,6 +983,13 @@
 
 <script>
 (function () {
+  /* Logos are not right-clickable, draggable, or long-press-savable. */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
 
   /* ══════════════════════════════
      LOADER

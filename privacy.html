@@ -11,6 +11,7 @@
     :root { --bg:#FAFAF7; --ink:#1A1A1A; --ink-65:rgba(26,26,26,0.65); --ink-40:rgba(26,26,26,0.4); --ink-08:rgba(26,26,26,0.08); --green:#556B2F; }
     [data-theme="dark"] { --bg:#0B160B; --ink:#FAFAF7; --ink-65:rgba(250,250,247,0.65); --ink-40:rgba(250,250,247,0.4); --ink-08:rgba(250,250,247,0.08); --green:#7A9B3F; }
     * { box-sizing:border-box; }
+    .oilive-logo-protect { -webkit-user-select:none; user-select:none; -webkit-user-drag:none; -webkit-touch-callout:none; }
     body { margin:0; background:var(--bg); color:var(--ink); font-family:'Instrument Sans',system-ui,sans-serif; transition:background 0.5s,color 0.5s; }
     a { color:var(--green); }
     header { display:flex; align-items:center; justify-content:space-between; padding:32px clamp(24px,8vw,120px); }
@@ -27,7 +28,7 @@
 </head>
 <body>
 <header>
-  <a href="index.html"><img id="header-logo" src="assets/oilive-logo.png" alt="OILIVE"></a>
+  <a href="index.html"><img id="header-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE"></a>
   <a class="back-link" href="index.html">&larr; Home</a>
 </header>
 <script>
@@ -37,6 +38,12 @@
     var logo = document.getElementById('header-logo');
     if (logo && saved === 'dark') logo.style.filter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
   })();
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
 </script>
 <main>
   <h1>Privacy Policy</h1>

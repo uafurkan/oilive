@@ -48,6 +48,12 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; }
+    .oilive-logo-protect {
+      -webkit-user-select: none; user-select: none;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      pointer-events: auto;
+    }
     body {
       margin: 0;
       background: var(--bg);
@@ -268,7 +274,7 @@
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <header>
-  <a href="index.html" aria-label="OILIVE home"><img id="header-logo" src="assets/oilive-logo.png" alt="OILIVE"></a>
+  <a href="index.html" aria-label="OILIVE home"><img id="header-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE"></a>
   <a class="back-link" href="index.html">&larr; Home</a>
 </header>
 
@@ -336,7 +342,7 @@
 </section>
 
 <footer>
-  <img id="footer-logo" src="assets/oilive-logo.png" alt="OILIVE">
+  <img id="footer-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE">
   <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:28px;">
       <a href="https://www.instagram.com/oilive.co" target="_blank" rel="noopener" class="footer-link">Instagram</a>
@@ -353,6 +359,14 @@
 
 <script>
 (function () {
+  /* Logos are not right-clickable, draggable, or long-press-savable. */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
+
   /* Theme (shared localStorage key with home page) */
   var html = document.documentElement;
   var toggleBtn = document.getElementById('theme-toggle');

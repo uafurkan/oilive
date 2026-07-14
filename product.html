@@ -40,6 +40,7 @@
       --green-d: #556B2F;
     }
     *, *::before, *::after { box-sizing: border-box; }
+    .oilive-logo-protect { -webkit-user-select:none; user-select:none; -webkit-user-drag:none; -webkit-touch-callout:none; }
     body {
       margin: 0; background: var(--bg); color: var(--ink);
       font-family: 'Instrument Sans', system-ui, sans-serif;
@@ -199,7 +200,7 @@
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
 <header>
-  <a href="index.html" aria-label="OILIVE home"><img id="header-logo" src="assets/oilive-logo.png" alt="OILIVE"></a>
+  <a href="index.html" aria-label="OILIVE home"><img id="header-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE"></a>
   <a class="back-link" href="collection.html">&larr; Collection</a>
 </header>
 
@@ -211,7 +212,7 @@
 </section>
 
 <footer>
-  <img id="footer-logo" src="assets/oilive-logo.png" alt="OILIVE">
+  <img id="footer-logo" class="oilive-logo-protect" src="assets/oilive-logo.png" alt="OILIVE">
   <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:28px;">
       <a href="collection.html" class="footer-link">Collection</a>
@@ -228,6 +229,12 @@
 
 <script>
 (function () {
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) {
+    if (e.target.closest('.oilive-logo-protect')) e.preventDefault();
+  });
   var PRODUCTS = {
     'first-pressing': {
       no: 'No. 01', name: 'The First Pressing', size: '500 ml — Early Harvest',

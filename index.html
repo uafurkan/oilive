@@ -542,16 +542,34 @@
       color: var(--ink-25);
     }
     .name-word .lit { color: var(--green); }
-    /* The O is no letter: a small olive glyph, stem and leaf included,
-       matching the wordmark. currentColor keeps lit/muted states working. */
+    /* The O is no letter: the wordmark's own olive — body, stem, leaf and
+       the dark collar where the stem enters — lifted straight from the logo
+       as alpha masks, so it is pixel-identical to the mark. currentColor
+       keeps the lit / muted / dark-mode states working. */
     .name-o {
+      position: relative;
       display: block;
-      height: 0.72em;
-      width: 0.585em;
-      overflow: visible;
+      width: 0.572em;
+      height: 0.97em; /* olive body = 0.72em cap height; the leaf rides above */
       margin-right: 0.04em;
       align-self: baseline;
     }
+    .name-o::before,
+    .name-o::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      -webkit-mask: url('assets/name-o-glyph.png') no-repeat center / 100% 100%;
+      mask: url('assets/name-o-glyph.png') no-repeat center / 100% 100%;
+    }
+    .name-o::before { background: currentColor; }
+    .name-o::after {
+      background: var(--ink);
+      -webkit-mask-image: url('assets/name-o-notch.png');
+      mask-image: url('assets/name-o-notch.png');
+    }
+    /* Muted rows stay monochrome; only a lit O wears the two-tone collar */
+    .name-o:not(.lit)::after { background: currentColor; }
     .name-key {
       font-size: 10px;
       letter-spacing: 0.3em;
@@ -671,15 +689,15 @@
   <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:64px;">The Name</span>
   <div style="display:flex;flex-direction:column;gap:44px;align-items:center;">
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="OIL"><svg class="name-o lit" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span class="lit">I</span><span class="lit">L</span><span>I</span><span>V</span><span>E</span></span>
+      <span class="name-word" aria-label="OIL"><span class="name-o lit" aria-hidden="true"></span><span class="lit">I</span><span class="lit">L</span><span>I</span><span>V</span><span>E</span></span>
       <span class="name-key">What we press</span>
     </div>
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="OLIVE"><svg class="name-o lit" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span>I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-word" aria-label="OLIVE"><span class="name-o lit" aria-hidden="true"></span><span>I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
       <span class="name-key">What we grow</span>
     </div>
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="I LIVE"><svg class="name-o" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span class="lit">I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-word" aria-label="I LIVE"><span class="name-o" aria-hidden="true"></span><span class="lit">I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
       <span class="name-key">What it&rsquo;s for</span>
     </div>
   </div>

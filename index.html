@@ -490,6 +490,40 @@
       border-bottom: 1px solid rgba(250,250,247,0.1);
     }
 
+    /* ─── Back-to-top leaf ─── */
+    #to-top {
+      position: fixed;
+      right: 20px; bottom: 24px;
+      z-index: 7000;
+      width: 46px; height: 52px;
+      padding: 7px 9px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #to-top.on { opacity: 1; transform: none; pointer-events: auto; }
+    #to-top svg {
+      display: block;
+      width: 100%; height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 2px 5px rgba(26,26,26,0.18));
+      transform-origin: 50% 96%;
+      transition: transform 0.3s ease;
+      /* `rotate` composes with `transform`, so the idle sway and the
+         hover/regrow scale never fight over the same property */
+      animation: leafIdle 6.5s ease-in-out infinite;
+    }
+    #to-top.on:hover svg { transform: scale(1.12); }
+    @keyframes leafIdle {
+      0%, 100% { rotate: -5deg; }
+      50%      { rotate: 6deg; }
+    }
+    @media (prefers-reduced-motion: reduce) { #to-top svg { animation: none; } }
+
     /* ─── Name anatomy ─── */
     .name-row {
       display: flex;
@@ -499,6 +533,7 @@
     }
     .name-word {
       display: flex;
+      align-items: baseline;
       font-family: 'Playfair Display', serif;
       font-weight: 500;
       font-size: clamp(44px, 7.5vw, 88px);
@@ -507,12 +542,26 @@
       color: var(--ink-25);
     }
     .name-word .lit { color: var(--green); }
+    /* The O is no letter: a small olive glyph, stem and leaf included,
+       matching the wordmark. currentColor keeps lit/muted states working. */
+    .name-o {
+      display: block;
+      height: 0.72em;
+      width: 0.585em;
+      overflow: visible;
+      margin-right: 0.04em;
+      align-self: baseline;
+    }
     .name-key {
       font-size: 10px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--ink-40);
     }
+    /* Dark mode: muted letters read as murky gray on the deep green
+       backdrop — lift them to near-white so all three rows stay legible */
+    [data-theme="dark"] .name-word { color: rgba(250,250,247,0.92); }
+    [data-theme="dark"] .name-key { color: rgba(250,250,247,0.6); }
 
     /* ─── Early access badge ─── */
     .early-badge {
@@ -569,6 +618,16 @@
 <img id="mini-logo-o" class="mini-logo-layer" src="assets/logo-layer-o.png" alt="OILIVE">
 <button id="theme-toggle" aria-label="Toggle dark mode"></button>
 
+<!-- Back-to-top leaf: breaks free on click, flutters up, and settles
+     back on the O of the wordmark as the page returns home -->
+<button id="to-top" aria-label="Back to top">
+  <svg viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M20 46.5 C 20.4 48.2 21 49.6 22 51" stroke="var(--green-d)" stroke-width="1.7" stroke-linecap="round"/>
+    <path d="M20 47 C 8.5 36 5 20 10.5 9.5 C 14 2.5 24.5 1 28.8 7 C 35 16.5 31 35 20 47 Z" fill="var(--green)"/>
+    <path d="M20 44.5 C 18.6 32 19.6 19 23.4 9.5" stroke="rgba(250,250,247,0.38)" stroke-width="1.1" stroke-linecap="round"/>
+  </svg>
+</button>
+
 <!-- Three.js canvas (fixed, behind everything) -->
 <canvas id="oilive-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
@@ -612,19 +671,19 @@
   <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:64px;">The Name</span>
   <div style="display:flex;flex-direction:column;gap:44px;align-items:center;">
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="OIL"><span class="lit">O</span><span class="lit">I</span><span class="lit">L</span><span>I</span><span>V</span><span>E</span></span>
+      <span class="name-word" aria-label="OIL"><svg class="name-o lit" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span class="lit">I</span><span class="lit">L</span><span>I</span><span>V</span><span>E</span></span>
       <span class="name-key">What we press</span>
     </div>
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="OLIVE"><span class="lit">O</span><span>I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-word" aria-label="OLIVE"><svg class="name-o lit" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span>I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
       <span class="name-key">What we grow</span>
     </div>
     <div class="name-row" data-reveal>
-      <span class="name-word" aria-label="I LIVE"><span>O</span><span class="lit">I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-word" aria-label="I LIVE"><svg class="name-o" viewBox="0 0 60 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="30" cy="43" rx="26.5" ry="30.5" fill="currentColor"/><path d="M31 14 C 30 8 31.5 3.5 35 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><ellipse cx="45" cy="-1" rx="13" ry="5" transform="rotate(-24 45 -1)" fill="currentColor"/></svg><span class="lit">I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
       <span class="name-key">What it&rsquo;s for</span>
     </div>
   </div>
-  <p data-reveal style="max-width:44ch;margin:64px auto 0;font-size:15px;line-height:1.85;color:var(--ink-65);text-wrap:pretty;">Our name holds three words. <strong style="color:var(--ink);font-weight:600;">Oil</strong>, for the press. <strong style="color:var(--ink);font-weight:600;">Olive</strong>, for the tree. And hiding in plain sight, a quiet promise &mdash; <em style="color:var(--green);">i live</em>. It&rsquo;s why the O stands alone, in green.</p>
+  <p data-reveal style="max-width:44ch;margin:64px auto 0;font-size:15px;line-height:1.85;color:var(--ink-65);text-wrap:pretty;">Our name holds three words. <strong style="color:var(--ink);font-weight:600;">Oil</strong>, for the press. <strong style="color:var(--ink);font-weight:600;">Olive</strong>, for the tree. And hiding in plain sight, a quiet promise &mdash; <em style="color:var(--green);">i live</em>. It&rsquo;s why our O is no letter at all: an olive, still wearing its leaf.</p>
 </section>
 
 <!-- ══════════════════════════════
@@ -1038,6 +1097,89 @@
         scrollDrop.style.top = (progress * 100) + '%';
         scrollDrop.style.opacity = progress > 0.01 ? '1' : '0';
       }
+    });
+  }
+
+  /* ══════════════════════════════
+     BACK-TO-TOP LEAF — on click the leaf breaks free from the button,
+     flutters up the viewport while the page glides home, and settles
+     where the wordmark's own leaf sits before fading out.
+  ══════════════════════════════ */
+  var toTop = document.getElementById('to-top');
+  if (toTop) {
+    bindFrameThrottled(function () {
+      var show = document.documentElement.scrollTop > window.innerHeight * 1.2;
+      toTop.classList.toggle('on', show);
+    });
+
+    var leafFlying = false;
+    toTop.addEventListener('click', function () {
+      if (leafFlying) return;
+      function scrollHome() {
+        if (lenis) lenis.scrollTo(0, { duration: 1.5 });
+        else window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        scrollHome();
+        return;
+      }
+
+      leafFlying = true;
+      var btnSvg = toTop.querySelector('svg');
+      var from = btnSvg.getBoundingClientRect();
+
+      /* Destination: the hero logo's leaf, in the viewport coordinates it
+         will have once scrolling finishes. The hero sits at the document
+         top, so its resting viewport position equals its document offset. */
+      var dest = { x: window.innerWidth * 0.4, y: window.innerHeight * 0.3 };
+      if (heroLogo) {
+        var hr = heroLogo.getBoundingClientRect();
+        dest.x = hr.left + hr.width * 0.115;
+        dest.y = hr.top + window.scrollY + hr.height * 0.02;
+      }
+
+      var ghost = document.createElement('div');
+      ghost.style.cssText = 'position:fixed;left:0;top:0;width:' + from.width +
+        'px;height:' + from.height + 'px;z-index:9500;pointer-events:none;will-change:transform;';
+      var ghostSvg = btnSvg.cloneNode(true);
+      ghostSvg.style.cssText = 'display:block;width:100%;height:100%;overflow:visible;';
+      ghost.appendChild(ghostSvg);
+      document.body.appendChild(ghost);
+
+      /* The button's leaf is "picked": it shrinks away, and grows back
+         once its twin has landed */
+      btnSvg.style.transform = 'scale(0)';
+      scrollHome();
+
+      var sx = from.left, sy = from.top;
+      var dx = dest.x - sx, dy = dest.y - sy;
+      var flight = { t: 0 };
+      gsap.to(flight, {
+        t: 1, duration: 1.7, ease: 'power2.inOut',
+        onUpdate: function () {
+          var t = flight.t;
+          /* First swing pulls inward (left), the flutter settles as it climbs */
+          var sway = -Math.sin(t * Math.PI * 3) * 42 * (1 - t * 0.6);
+          var rot = Math.sin(t * Math.PI * 5) * 26 * (1 - t * 0.45);
+          var lift = 1 + 0.18 * Math.sin(t * Math.PI);
+          gsap.set(ghost, {
+            x: sx + dx * t + sway,
+            y: sy + dy * t,
+            rotation: rot,
+            scale: lift,
+            opacity: t > 0.82 ? 1 - (t - 0.82) / 0.18 : 1
+          });
+        },
+        onComplete: function () {
+          ghost.remove();
+          btnSvg.style.transition = 'transform 0.7s cubic-bezier(.34,1.56,.64,1)';
+          btnSvg.style.transform = '';
+          setTimeout(function () {
+            btnSvg.style.transition = '';
+            leafFlying = false;
+          }, 720);
+        }
+      });
     });
   }
 

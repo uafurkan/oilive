@@ -324,26 +324,6 @@
     .insta-overlay svg { opacity: 0; transition: opacity 0.3s; }
     .insta-tile:hover .insta-overlay svg { opacity: 1; }
 
-    /* ─── Press logos ─── */
-    .press-logos {
-      display: flex;
-      align-items: center;
-      gap: clamp(28px, 5vw, 72px);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .press-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(14px, 1.8vw, 20px);
-      font-weight: 500;
-      color: var(--ink-25);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-      opacity: 0;
-      transition: color 0.3s;
-    }
-    .press-logo:hover { color: var(--ink-65); }
-
     /* ─── Notify form ─── */
     #notify-email {
       flex: 1; min-width: 0;
@@ -443,6 +423,18 @@
       transform-origin: top;
       will-change: transform;
     }
+    /* A drop of oil rides the end of the fill line */
+    #scroll-progress-drop {
+      position: absolute;
+      top: 0; left: 50%;
+      width: 7px; height: 9px;
+      margin: -4px 0 0 -3.5px;
+      border-radius: 46% 54% 60% 60% / 40% 40% 62% 62%;
+      background: radial-gradient(circle at 35% 28%, #EBCB6F 0%, #CBA22A 55%, #9C7B14 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      will-change: top;
+    }
     @media (max-width: 560px) { #scroll-progress { width: 2px; } }
 
     /* ─── Field notes ─── */
@@ -498,6 +490,30 @@
       border-bottom: 1px solid rgba(250,250,247,0.1);
     }
 
+    /* ─── Name anatomy ─── */
+    .name-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .name-word {
+      display: flex;
+      font-family: 'Playfair Display', serif;
+      font-weight: 500;
+      font-size: clamp(44px, 7.5vw, 88px);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: var(--ink-25);
+    }
+    .name-word .lit { color: var(--green); }
+    .name-key {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-40);
+    }
+
     /* ─── Early access badge ─── */
     .early-badge {
       display: inline-flex;
@@ -540,7 +556,7 @@
 <div id="grain" aria-hidden="true"></div>
 
 <!-- Scroll progress rail -->
-<div id="scroll-progress" aria-hidden="true"><span id="scroll-progress-fill"></span></div>
+<div id="scroll-progress" aria-hidden="true"><span id="scroll-progress-fill"></span><span id="scroll-progress-drop"></span></div>
 
 <!-- Page loader -->
 <div id="loader">
@@ -590,6 +606,28 @@
 </section>
 
 <!-- ══════════════════════════════
+     B1. THE NAME — one word, three readings
+══════════════════════════════ -->
+<section class="sec-light" data-screen-label="Name" style="position:relative;z-index:1;padding:150px clamp(24px,8vw,120px);border-top:1px solid var(--ink-08);text-align:center;">
+  <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:64px;">The Name</span>
+  <div style="display:flex;flex-direction:column;gap:44px;align-items:center;">
+    <div class="name-row" data-reveal>
+      <span class="name-word" aria-label="OIL"><span class="lit">O</span><span class="lit">I</span><span class="lit">L</span><span>I</span><span>V</span><span>E</span></span>
+      <span class="name-key">What we press</span>
+    </div>
+    <div class="name-row" data-reveal>
+      <span class="name-word" aria-label="OLIVE"><span class="lit">O</span><span>I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-key">What we grow</span>
+    </div>
+    <div class="name-row" data-reveal>
+      <span class="name-word" aria-label="I LIVE"><span>O</span><span class="lit">I</span><span class="lit">L</span><span class="lit">I</span><span class="lit">V</span><span class="lit">E</span></span>
+      <span class="name-key">What it&rsquo;s for</span>
+    </div>
+  </div>
+  <p data-reveal style="max-width:44ch;margin:64px auto 0;font-size:15px;line-height:1.85;color:var(--ink-65);text-wrap:pretty;">Our name holds three words. <strong style="color:var(--ink);font-weight:600;">Oil</strong>, for the press. <strong style="color:var(--ink);font-weight:600;">Olive</strong>, for the tree. And hiding in plain sight, a quiet promise &mdash; <em style="color:var(--green);">i live</em>. It&rsquo;s why the O stands alone, in green.</p>
+</section>
+
+<!-- ══════════════════════════════
      B2. ORIGIN
 ══════════════════════════════ -->
 <section class="sec-light" data-screen-label="Origin" style="position:relative;z-index:1;padding:140px clamp(24px,8vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:center;gap:80px;border-top:1px solid var(--ink-08);">
@@ -602,6 +640,8 @@
       <span style="font-size:13px;color:var(--ink-65);">Elevation — <strong style="color:var(--ink);font-weight:600;">120–280 m</strong></span>
       <span style="font-size:13px;color:var(--ink-65);">Regions — <strong style="color:var(--ink);font-weight:600;">Balıkesir &amp; Muğla, Türkiye</strong></span>
     </div>
+    <!-- Live conditions at the grove; stays invisible unless data arrives -->
+    <span id="grove-weather" style="display:block;min-height:14px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-40);opacity:0;transition:opacity 0.8s;"></span>
     <div class="specs-row" data-reveal style="margin-top:8px;">
       <div class="spec-item">
         <span class="spec-value" data-count data-count-to="3200" data-count-suffix="+">0</span>
@@ -780,23 +820,18 @@
           <span class="spec-label">Batch Lot</span>
         </div>
       </div>
+      <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(250,250,247,0.1);font-family:'Instrument Sans',sans-serif;font-size:11.5px;letter-spacing:0.05em;line-height:1.7;color:rgba(250,250,247,0.45);">Every bottle is numbered by hand. The registry opens with Lot No. 001 &mdash; enter your number, see your harvest.</p>
     </div>
     <a data-reveal data-magnetic href="collection.html" style="display:inline-flex;align-items:center;gap:12px;align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#FAFAF7;border-bottom:1px solid var(--green);padding-bottom:8px;transition:color 0.2s;" onmouseover="this.style.color='#7A9B3F'" onmouseout="this.style.color='#FAFAF7'">Explore the Collection <span aria-hidden="true">&rarr;</span></a>
   </div>
 </section>
 
 <!-- ══════════════════════════════
-     E. PRESS PLACEHOLDER
+     E. PRESS
 ══════════════════════════════ -->
 <section class="sec-light" data-screen-label="Press" style="position:relative;z-index:1;padding:100px clamp(24px,8vw,120px);border-top:1px solid var(--ink-08);text-align:center;">
-  <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--ink-40);font-weight:600;margin-bottom:52px;">As Featured In</span>
-  <div class="press-logos">
-    <span class="press-logo">The New Yorker</span>
-    <span class="press-logo">Monocle</span>
-    <span class="press-logo">Condé Nast Traveller</span>
-    <span class="press-logo">Food &amp; Wine</span>
-    <span class="press-logo">Bon Appétit</span>
-  </div>
+  <span data-reveal style="display:block;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--ink-40);font-weight:600;margin-bottom:28px;">Press &amp; Wholesale</span>
+  <p data-reveal style="margin:0 auto;max-width:44ch;font-family:'Playfair Display',serif;font-size:clamp(19px,2.2vw,26px);font-style:italic;line-height:1.5;color:var(--ink-65);">Writing about olive oil, or pouring it?<br>We&rsquo;d love to talk &mdash; <a href="mailto:hello@oilive.co" style="border-bottom:1px solid var(--green);padding-bottom:2px;">hello@oilive.co</a></p>
 </section>
 
 <!-- ══════════════════════════════
@@ -992,14 +1027,48 @@
      SCROLL PROGRESS RAIL
   ══════════════════════════════ */
   var scrollFill = document.getElementById('scroll-progress-fill');
+  var scrollDrop = document.getElementById('scroll-progress-drop');
   if (scrollFill) {
     bindFrameThrottled(function () {
       var doc = document.documentElement;
       var max = doc.scrollHeight - doc.clientHeight;
       var progress = max > 0 ? Math.min(1, Math.max(0, doc.scrollTop / max)) : 0;
       scrollFill.style.transform = 'scaleY(' + progress + ')';
+      if (scrollDrop) {
+        scrollDrop.style.top = (progress * 100) + '%';
+        scrollDrop.style.opacity = progress > 0.01 ? '1' : '0';
+      }
     });
   }
+
+  /* ══════════════════════════════
+     GROVE WEATHER — live conditions at Ayvalık (Open-Meteo, no key).
+     Purely decorative: if the request fails the line simply never appears.
+  ══════════════════════════════ */
+  (function groveWeather() {
+    var el = document.getElementById('grove-weather');
+    if (!el || !window.fetch) return;
+    function sky(code) {
+      if (code === 0) return 'clear skies';
+      if (code <= 2) return 'mostly clear';
+      if (code === 3) return 'overcast';
+      if (code <= 48) return 'morning fog';
+      if (code <= 67) return 'light rain';
+      if (code <= 77) return 'snow';
+      if (code <= 82) return 'passing showers';
+      return 'a storm rolling in';
+    }
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=39.32&longitude=26.70&current=temperature_2m,wind_speed_10m,weather_code')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var c = d && d.current;
+        if (!c || typeof c.temperature_2m !== 'number') return;
+        var wind = c.wind_speed_10m < 12 ? 'light wind' : c.wind_speed_10m < 28 ? 'fresh wind' : 'strong wind';
+        el.textContent = 'At the grove now — ' + Math.round(c.temperature_2m) + '°C, ' + sky(c.weather_code) + ', ' + wind;
+        el.style.opacity = '1';
+      })
+      .catch(function () {});
+  })();
 
   /* ══════════════════════════════
      CUSTOM CURSOR
@@ -1290,6 +1359,12 @@
       }
       pos.needsUpdate = true;
       geo.computeVertexNormals();
+      /* The leaf stirs every so often, as if caught by a breeze:
+         a slow carrier wave gated so it only registers near its peaks */
+      var breeze = Math.sin(t * 0.45);
+      var sway = Math.max(0, breeze - 0.55) * Math.sin(t * 5.2) * 0.28;
+      leaf.rotation.z = 0.95 + sway;
+      leaf.rotation.x = 0.25 + sway * 0.4;
       drop.rotation.y = t*0.12 + _scroll.rotY;
       drop.rotation.z = 0.12*Math.sin(t*0.3);
       drop.position.x = _scroll.x;
@@ -1543,11 +1618,6 @@
       });
     }
 
-    /* Press logos stagger */
-    gsap.to('.press-logo', {
-      opacity:1, y:0, duration:0.7, stagger:0.1, ease:'power2.out',
-      scrollTrigger: { trigger:"[data-screen-label='Press']", start:'top 80%' }
-    });
   }
 
 })();

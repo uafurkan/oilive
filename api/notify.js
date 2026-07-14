@@ -27,12 +27,10 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Upstream error' });
     }
 
-    // Independent calls: the welcome email must not delay (or be delayed by)
-    // the waitlist-position lookup, so run them in parallel.
-    const [, position] = await Promise.all([
-      sendWelcomeEmail(headers, email),
-      getWaitlistPosition(headers, audienceId),
-    ]);
+    // Position first: the welcome email carries the subscriber's number
+    // ("Your place — No. N"), mirroring the hand-numbered bottles.
+    const position = await getWaitlistPosition(headers, audienceId);
+    await sendWelcomeEmail(headers, email, position);
 
     return res.status(200).json({ ok: true, position });
   } catch {
@@ -61,7 +59,7 @@ async function addToAudience(headers, audienceId, email) {
  * Sends the branded welcome email. Failures are deliberately swallowed:
  * a missing email must never surface as a failed signup.
  */
-function sendWelcomeEmail(headers, email) {
+function sendWelcomeEmail(headers, email, position) {
   return fetch(`${RESEND_API}/emails`, {
     method: 'POST',
     headers,
@@ -69,7 +67,7 @@ function sendWelcomeEmail(headers, email) {
       from: FROM_ADDRESS,
       to: email,
       subject: WELCOME_SUBJECT,
-      html: WELCOME_EMAIL_HTML,
+      html: buildWelcomeEmail(position),
     }),
   }).catch(() => null);
 }
@@ -91,7 +89,26 @@ async function getWaitlistPosition(headers, audienceId) {
   }
 }
 
-const WELCOME_EMAIL_HTML = `
+/**
+ * Renders the welcome email. When the subscriber's waitlist position is
+ * known, a "Your place — No. N" line is added under the headline,
+ * echoing the hand-numbered bottles; otherwise the row is omitted.
+ */
+function buildWelcomeEmail(position) {
+  const placeRow = Number.isInteger(position) && position > 0
+    ? `
+    <tr>
+      <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:0 32px 26px;background:#ffffff;">
+        <p class="oilive-ink-sub" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#1A1A1A99;margin:0;">
+          Your place &mdash; <span class="oilive-green" style="color:#556B2F;font-weight:600;">No. ${position}</span>
+        </p>
+      </td>
+    </tr>`
+    : '';
+  return WELCOME_EMAIL_TEMPLATE.replace('<!--PLACE_ROW-->', placeRow);
+}
+
+const WELCOME_EMAIL_TEMPLATE = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -137,7 +154,7 @@ const WELCOME_EMAIL_HTML = `
           Something green is coming.
         </p>
       </td>
-    </tr>
+    </tr><!--PLACE_ROW-->
     <tr>
       <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:0 32px 40px;background:#ffffff;">
         <p class="oilive-ink-sub" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.7;color:#1A1A1A99;margin:0;">

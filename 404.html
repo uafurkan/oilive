@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found — OILIVE</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+  <meta name="robots" content="noindex">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#FAFAF7; --ink:#1A1A1A; --ink-65:rgba(26,26,26,0.65); --ink-40:rgba(26,26,26,0.4); --ink-08:rgba(26,26,26,0.08); --green:#556B2F; }
+    [data-theme="dark"] { --bg:#0B160B; --ink:#FAFAF7; --ink-65:rgba(250,250,247,0.65); --ink-40:rgba(250,250,247,0.4); --ink-08:rgba(250,250,247,0.08); --green:#7A9B3F; }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+      font-family:'Instrument Sans',system-ui,sans-serif;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:40px 24px; transition:background 0.5s,color 0.5s;
+    }
+    a { color:var(--green); }
+    img { width:min(220px,52vw); height:auto; opacity:0.92; margin-bottom:40px; transition:filter 0.4s; }
+    .eyebrow { font-size:11px; letter-spacing:0.35em; text-transform:uppercase; color:var(--green); font-weight:600; margin-bottom:20px; }
+    h1 { font-family:'Playfair Display',serif; font-weight:500; font-style:italic; font-size:clamp(28px,4vw,44px); margin:0 0 18px; line-height:1.25; }
+    p { font-size:15px; line-height:1.8; color:var(--ink-65); max-width:42ch; margin:0 0 40px; }
+    .home-link {
+      font-size:11px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--ink); border-bottom:1px solid var(--green); padding-bottom:8px;
+      transition:color 0.2s;
+    }
+    .home-link:hover { color:var(--green); }
+  </style>
+</head>
+<body>
+  <img id="logo" src="assets/oilive-logo.png" alt="OILIVE">
+  <span class="eyebrow">404</span>
+  <h1>This grove doesn't exist.</h1>
+  <p>The page you're looking for was never pressed. Let's get you back to solid ground.</p>
+  <a class="home-link" href="/">Back to Home</a>
+  <script>
+    (function () {
+      var saved = localStorage.getItem('oilive-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      var logo = document.getElementById('logo');
+      if (logo && saved === 'dark') logo.style.filter = 'invert(1) hue-rotate(180deg) brightness(1.05)';
+    })();
+  </script>
+</body>
+</html>

@@ -44,7 +44,18 @@ export default async function handler(req, res) {
       }),
     }).catch(function () {});
 
-    return res.status(200).json({ ok: true });
+    let position = null;
+    try {
+      const listResp = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (listResp.ok) {
+        const listData = await listResp.json();
+        if (Array.isArray(listData.data)) position = listData.data.length;
+      }
+    } catch (err) {}
+
+    return res.status(200).json({ ok: true, position });
   } catch (err) {
     return res.status(500).json({ error: 'Server error' });
   }

@@ -407,6 +407,9 @@
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
       background-repeat: repeat;
       animation: grainShift 8s steps(10) infinite;
+      /* own compositor layer: keeps the blended, animated texture from
+         forcing main-thread repaints while the page scrolls under it */
+      will-change: transform;
     }
     @keyframes grainShift {
       0%   { transform: translate(0,0); }
@@ -1356,11 +1359,15 @@
       new THREE.Vector2(0.00, 2.86)
     ];
     var bodyGeo = new THREE.LatheGeometry(pts, 56);
+    /* Dark glass sold by env-map reflections + clearcoat alone.
+       Deliberately NO `transmission`: its refraction pass re-renders the
+       whole scene to an offscreen target on every frame, and was the
+       main FPS drain while the bottle was on screen — on near-black
+       glass the refraction itself was invisible anyway. */
     var glassMat = new THREE.MeshPhysicalMaterial({
       color: 0x0d1608, roughness: 0.1, metalness: 0.0,
       clearcoat: 1, clearcoatRoughness: 0.08,
-      transmission: 0.6, thickness: 1.3, ior: 1.45,
-      envMapIntensity: 1.15
+      envMapIntensity: 1.3
     });
     var body = new THREE.Mesh(bodyGeo, glassMat);
 
@@ -1406,10 +1413,9 @@
         bottleVisible = entries[0].isIntersecting;
       }, { rootMargin: '200px 0px' }).observe(canvas);
     }
-    /* The glass material's transmission pass makes every render of this
-       scene expensive, so only re-render on frames where the bottle
-       actually moved — identical output, a fraction of the GPU work
-       (on touch devices that means renders happen only mid-scroll) */
+    /* Only re-render on frames where the bottle actually moved —
+       identical output, a fraction of the GPU work (on touch devices
+       that means renders happen only mid-scroll) */
     var lastRY = null, lastRX = null, lastRZ = null;
     (function tick() {
       requestAnimationFrame(tick);

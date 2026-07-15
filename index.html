@@ -1626,15 +1626,20 @@
     cap.position.y = 2.97;
 
     /* Single opaque label: icon pre-composited onto off-white in the texture,
-       so no alpha blending is involved at render time */
+       so no alpha blending is involved at render time.
+       Wrapped as a curved band matching the bottle's radius at this height
+       (~0.715) instead of a flat plane — a flat rectangle only touches a
+       cylinder along one vertical line, so its edges visibly lift off the
+       glass at any angle other than dead-on. */
     var labelTex = new THREE.TextureLoader().load('assets/label.png');
     if (THREE.SRGBColorSpace) labelTex.colorSpace = THREE.SRGBColorSpace;
     labelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    var labelRadius = 0.722, labelWidth = 0.78, labelArc = labelWidth / labelRadius;
     var label = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.78, 1.1),
-      new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.75 })
+      new THREE.CylinderGeometry(labelRadius, labelRadius, 1.1, 24, 1, true, -labelArc / 2, labelArc),
+      new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.75, side: THREE.FrontSide })
     );
-    label.position.set(0, 1.15, 0.72);
+    label.position.set(0, 1.15, 0);
 
     var group = new THREE.Group();
     group.add(body, cap, label);

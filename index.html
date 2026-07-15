@@ -1756,10 +1756,16 @@
     /* Only re-render on frames where the bottle actually moved —
        identical output, a fraction of the GPU work (on touch devices
        that means renders happen only mid-scroll) */
-    var lastRY = null, lastRX = null, lastRZ = null;
-    (function tick() {
+    /* Slow constant self-rotation, like a turntable in a shop window —
+       runs always, drag just adds on top of it and it keeps going after
+       release. Paused only while a finger/mouse is actively driving it,
+       so the two don't fight each other. */
+    var autoRot = 0, autoRotSpeed = 0.1, lastT = null;
+    (function tick(t) {
       requestAnimationFrame(tick);
-      if (!bottleVisible) return;
+      if (!bottleVisible) { lastT = t; return; }
+      var dt = lastT === null ? 0 : (t - lastT) / 1000;
+      lastT = t;
       mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
       my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
       if (!dragging && dragVelocity) {
@@ -1767,12 +1773,8 @@
         dragVelocity *= 0.94;
         if (Math.abs(dragVelocity) < 0.0002) dragVelocity = 0;
       }
-      var ry = 0.4 + mx * 0.55 + userRotY, rx = -my * 0.22, rz = tilt.sway;
-      if (lastRY !== null &&
-          Math.abs(ry - lastRY) < 0.0005 &&
-          Math.abs(rx - lastRX) < 0.0005 &&
-          Math.abs(rz - lastRZ) < 0.0005) return;
-      lastRY = ry; lastRX = rx; lastRZ = rz;
+      if (!dragging) autoRot += dt * autoRotSpeed;
+      var ry = 0.4 + mx * 0.55 + userRotY + autoRot, rx = -my * 0.22, rz = tilt.sway;
       group.rotation.y = ry;
       group.rotation.x = rx;
       group.rotation.z = rz;

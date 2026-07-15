@@ -82,6 +82,14 @@
       pointer-events: auto;
     }
     @media (max-width: 720px) { #bottle-canvas { max-width: 140px !important; touch-action: pan-y; } }
+    /* Mobile: 100vh is measured with the browser bars hidden, so with
+       bars visible a "full-screen" section overflows the actual screen.
+       svh is the bars-visible height — stable, no reflow on bar toggle. */
+    @supports (min-height: 100svh) {
+      section[data-screen-label='Hero'],
+      section[data-screen-label='Story'],
+      section[data-screen-label='Product'] { min-height: 100svh !important; }
+    }
     #bottle-canvas { cursor: grab; }
     #bottle-canvas.grabbing { cursor: grabbing; }
 
@@ -418,7 +426,7 @@
     #scroll-progress {
       position: fixed;
       top: 0; left: 0;
-      width: 3px; height: 100vh;
+      width: 3px; height: 100vh; height: 100dvh;
       z-index: 7500;
       background: var(--ink-08);
       pointer-events: none;
@@ -1495,7 +1503,16 @@
     _three = { scene: scene, camera: camera, drop: drop, geo: geo };
     _scroll = { rotY: 0, x: isMobile ? 0 : 1.35, y: isMobile ? -1.5 : 0, scale: isMobile ? 0.62 : 1 };
 
+    /* On touch devices the browser chrome (URL/tab bars) hiding and
+       showing during scroll fires resize events where only the height
+       changes — re-fitting the canvas to that makes the whole 3D layer
+       visibly jump mid-scroll. Only honor width changes there; a real
+       orientation change alters width too, so it still passes. */
+    var lastResizeW = window.innerWidth;
     window.addEventListener('resize', function () {
+      var coarse = window.matchMedia('(pointer: coarse)').matches;
+      if (coarse && window.innerWidth === lastResizeW) return;
+      lastResizeW = window.innerWidth;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1808,6 +1825,12 @@
   function initScroll() {
     var gsap = window.gsap;
     gsap.registerPlugin(window.ScrollTrigger);
+
+    /* Mobile browser bars showing/hiding fire height-only resizes;
+       without this, every bar toggle makes ScrollTrigger recompute all
+       start/end positions mid-scroll, so scrub values (olive scale,
+       rotations) visibly jump at the same scroll position. */
+    window.ScrollTrigger.config({ ignoreMobileResize: true });
 
     /* Connect Lenis → ScrollTrigger */
     if (lenis) {

@@ -81,7 +81,9 @@
       -webkit-touch-callout: none;
       pointer-events: auto;
     }
-    @media (max-width: 720px) { #bottle-canvas { max-width: 140px; } }
+    @media (max-width: 720px) { #bottle-canvas { max-width: 140px !important; touch-action: pan-y; } }
+    #bottle-canvas { cursor: grab; }
+    #bottle-canvas.grabbing { cursor: grabbing; }
 
     /* ─── Cursor ─── */
     #cursor {
@@ -1652,6 +1654,31 @@
 
     var tilt = { sway: -0.1 };
     var mx = 0, my = 0;
+
+    /* Drag-to-rotate: gives touch users direct control instead of relying
+       on the ambient hover-parallax below (which needs a mouse to "hover"
+       and does nothing for a finger that isn't actively touching). Works
+       with mouse too, additively, since pointer events unify both. */
+    var userRotY = 0, dragging = false, dragLastX = 0, dragVelocity = 0;
+    canvas.addEventListener('pointerdown', function (e) {
+      dragging = true; dragVelocity = 0; dragLastX = e.clientX;
+      canvas.classList.add('grabbing');
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - dragLastX;
+      dragLastX = e.clientX;
+      /* Once the drag is clearly horizontal, claim the gesture so the
+         page doesn't scroll out from under the spin. */
+      if (Math.abs(dx) > 2 && e.cancelable) e.preventDefault();
+      dragVelocity = dx * 0.012;
+      userRotY += dragVelocity;
+    });
+    function endDrag() { dragging = false; canvas.classList.remove('grabbing'); }
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('pointerleave', function () { if (dragging) endDrag(); });
     /* Skip rendering while the bottle is off-screen — cuts GPU work
        (and the scroll jank it causes) for most of the page's scroll range
        without altering how the bottle looks whenever it IS visible */
@@ -1670,7 +1697,12 @@
       if (!bottleVisible) return;
       mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
       my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
-      var ry = 0.4 + mx * 0.55, rx = -my * 0.22, rz = tilt.sway;
+      if (!dragging && dragVelocity) {
+        userRotY += dragVelocity;
+        dragVelocity *= 0.94;
+        if (Math.abs(dragVelocity) < 0.0002) dragVelocity = 0;
+      }
+      var ry = 0.4 + mx * 0.55 + userRotY, rx = -my * 0.22, rz = tilt.sway;
       if (lastRY !== null &&
           Math.abs(ry - lastRY) < 0.0005 &&
           Math.abs(rx - lastRX) < 0.0005 &&

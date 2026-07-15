@@ -1641,8 +1641,68 @@
     );
     label.position.set(0, 1.15, 0);
 
+    /* Back label: the regulatory/ingredients panel every real olive oil
+       bottle carries. Drawn on a canvas rather than shipped as an image —
+       it's plain text, so this avoids another asset round-trip. Curved
+       the same way as the front label, centered on the -z side. */
+    var backCanvas = document.createElement('canvas');
+    backCanvas.width = 512; backCanvas.height = 720;
+    (function drawBackLabel() {
+      var ctx = backCanvas.getContext('2d');
+      var w = backCanvas.width, h = backCanvas.height;
+      ctx.fillStyle = '#F7F6F0'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#1A1A1A';
+      ctx.textAlign = 'center';
+
+      ctx.font = '600 15px Instrument Sans, sans-serif';
+      ctx.fillText('OILIVE', w / 2, 66);
+      ctx.strokeStyle = 'rgba(26,26,26,0.18)';
+      ctx.beginPath(); ctx.moveTo(w * 0.22, 86); ctx.lineTo(w * 0.78, 86); ctx.stroke();
+
+      function row(label, value, y, valSize) {
+        ctx.textAlign = 'left';
+        ctx.font = '600 11px Instrument Sans, sans-serif';
+        ctx.fillStyle = 'rgba(26,26,26,0.45)';
+        ctx.fillText(label, w * 0.14, y);
+        ctx.textAlign = 'right';
+        ctx.font = (valSize || 13) + 'px Instrument Sans, sans-serif';
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillText(value, w * 0.86, y);
+      }
+
+      var y = 140;
+      row('INGREDIENTS', '', y); y += 22;
+      ctx.textAlign = 'left'; ctx.font = '13px Instrument Sans, sans-serif'; ctx.fillStyle = '#1A1A1A';
+      ctx.fillText('100% Extra Virgin Olive Oil', w * 0.14, y);
+      y += 46;
+      row('ORIGIN', 'Aegean Region, Türkiye', y); y += 40;
+      row('NET WEIGHT', '500 mL (16.9 FL OZ)', y); y += 40;
+      row('EXTRACTION', 'First Cold Press', y); y += 40;
+      row('LOT NO.', '001', y); y += 40;
+      row('BEST BY', '18 months from harvest', y); y += 56;
+
+      ctx.strokeStyle = 'rgba(26,26,26,0.18)';
+      ctx.beginPath(); ctx.moveTo(w * 0.14, y); ctx.lineTo(w * 0.86, y); ctx.stroke();
+      y += 34;
+      ctx.textAlign = 'center';
+      ctx.font = '11px Instrument Sans, sans-serif'; ctx.fillStyle = 'rgba(26,26,26,0.55)';
+      ctx.fillText('Produced and bottled in Türkiye', w / 2, y); y += 20;
+      ctx.fillText('Store in a cool, dark place', w / 2, y); y += 34;
+      ctx.font = '600 11px Instrument Sans, sans-serif'; ctx.fillStyle = 'rgba(26,26,26,0.7)';
+      ctx.fillText('oilive.co', w / 2, y);
+    })();
+    var backLabelTex = new THREE.CanvasTexture(backCanvas);
+    if (THREE.SRGBColorSpace) backLabelTex.colorSpace = THREE.SRGBColorSpace;
+    backLabelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    var backLabelWidth = 0.9, backLabelArc = backLabelWidth / labelRadius;
+    var backLabel = new THREE.Mesh(
+      new THREE.CylinderGeometry(labelRadius, labelRadius, 1.35, 24, 1, true, Math.PI - backLabelArc / 2, backLabelArc),
+      new THREE.MeshStandardMaterial({ map: backLabelTex, roughness: 0.8, side: THREE.FrontSide })
+    );
+    backLabel.position.set(0, 1.1, 0);
+
     var group = new THREE.Group();
-    group.add(body, cap, label);
+    group.add(body, cap, label, backLabel);
     group.position.y = -1.5;
     group.scale.setScalar(0.93);
     scene.add(group);

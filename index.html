@@ -1764,7 +1764,7 @@
     (function tick(t) {
       requestAnimationFrame(tick);
       if (!bottleVisible) { lastT = t; return; }
-      var dt = lastT === null ? 0 : (t - lastT) / 1000;
+      var dt = lastT === null ? 0 : Math.min((t - lastT) / 1000, 0.1);
       lastT = t;
       mx += ((typeof mouseNX !== 'undefined' ? mouseNX : 0) - mx) * 0.06;
       my += ((typeof mouseNY !== 'undefined' ? mouseNY : 0) - my) * 0.06;
@@ -1779,7 +1779,7 @@
       group.rotation.x = rx;
       group.rotation.z = rz;
       renderer.render(scene, camera);
-    })();
+    })(performance.now());
 
     _bottle3D = { group: group, tilt: tilt };
   }

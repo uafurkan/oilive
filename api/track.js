@@ -1,4 +1,4 @@
-const GEO_API = 'http://ip-api.com/json';
+const GEO_API = 'https://api.ip2location.io';
 const TELEGRAM_API = 'https://api.telegram.org';
 const BOT_NAME = 'OILIVE';
 
@@ -45,11 +45,26 @@ async function lookupGeo(ip) {
   if (!ip || ip === '::1' || ip.startsWith('127.') || ip.startsWith('10.') || ip.startsWith('192.168.')) {
     return null;
   }
-  const fields = 'status,country,countryCode,regionName,city,lat,lon,isp,org,query';
-  const resp = await fetch(`${GEO_API}/${encodeURIComponent(ip)}?fields=${fields}`);
+  const key = process.env.IP2LOCATION_API_KEY;
+  if (!key) return null;
+
+  const resp = await fetch(
+    `${GEO_API}/?key=${encodeURIComponent(key)}&ip=${encodeURIComponent(ip)}&format=json`
+  );
   if (!resp.ok) return null;
   const data = await resp.json();
-  return data.status === 'success' ? data : null;
+  if (!data || data.error) return null;
+
+  // Normalize to the shape the rest of this file expects.
+  return {
+    country: data.country_name,
+    countryCode: data.country_code,
+    regionName: data.region_name,
+    city: data.city_name,
+    lat: data.latitude,
+    lon: data.longitude,
+    isp: data.as || data.isp,
+  };
 }
 
 function buildMessage({ ip, ua, page, referrer, geo }) {

@@ -16,14 +16,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Always respond fast — this is a fire-and-forget beacon from the client.
-  res.status(204).end();
-
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return;
 
   try {
+    if (!token || !chatId) return;
+
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || '';
     const page = typeof req.body?.page === 'string' ? req.body.page : '/';
@@ -33,9 +31,14 @@ export default async function handler(req, res) {
 
     const geo = await lookupGeo(ip);
     const message = buildMessage({ ip, ua, page, referrer, geo });
+    // Awaited (not fire-and-forget): Vercel's serverless runtime can freeze
+    // the function the instant a response is sent, killing any request
+    // still in flight — so the Telegram send must finish before we respond.
     await sendTelegramMessage(token, chatId, message);
   } catch {
     // Never let tracking failures affect the visitor's experience.
+  } finally {
+    res.status(204).end();
   }
 }
 

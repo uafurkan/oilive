@@ -30,6 +30,8 @@ export default async function handler(req, res) {
     if (isKnownBot(ua)) return;
 
     const geo = await lookupGeo(ip);
+    if (isHostingOrCloudIsp(geo?.isp)) return;
+
     const message = buildMessage({ ip, ua, page, referrer, geo });
     // Awaited (not fire-and-forget): Vercel's serverless runtime can freeze
     // the function the instant a response is sent, killing any request
@@ -50,6 +52,14 @@ function getClientIp(req) {
 
 function isKnownBot(ua) {
   return /bot|spider|crawler|slurp|facebookexternalhit|vercel-screenshot/i.test(ua);
+}
+
+// ISP/org names typical of cloud hosting, data centers, and crawler
+// infrastructure rather than a real visitor's residential/mobile connection.
+const HOSTING_ISP_PATTERN = /amazon|aws|google|microsoft|azure|digitalocean|linode|vultr|ovh|hetzner|cloudflare|oracle cloud|alibaba|tencent|hosting|datacenter|data center|colo(cation)?|server|advin|leaseweb|choopa|contabo|scaleway|m247|hivelocity|psychz|clouvider/i;
+
+function isHostingOrCloudIsp(isp) {
+  return typeof isp === 'string' && HOSTING_ISP_PATTERN.test(isp);
 }
 
 async function lookupGeo(ip) {

@@ -66,8 +66,10 @@ function sendWelcomeEmail(headers, email, position) {
     body: JSON.stringify({
       from: FROM_ADDRESS,
       to: email,
+      reply_to: 'hello@oilive.co',
       subject: WELCOME_SUBJECT,
       html: buildWelcomeEmail(position),
+      text: buildWelcomeEmailText(position),
     }),
   }).catch(() => null);
 }
@@ -106,6 +108,32 @@ function buildWelcomeEmail(position) {
     </tr>`
     : '';
   return WELCOME_EMAIL_TEMPLATE.replace('<!--PLACE_ROW-->', placeRow);
+}
+
+/**
+ * Plain-text companion to buildWelcomeEmail. Resend sends both parts
+ * together — an HTML-only email reads as more "campaign-like" to inbox
+ * classifiers, so a text alternative is included even though most
+ * clients will render the HTML version.
+ */
+function buildWelcomeEmailText(position) {
+  const placeLine = Number.isInteger(position) && position > 0
+    ? `Your place — No. ${position}\n\n`
+    : '';
+  return (
+    `Something green is coming.\n\n` +
+    placeLine +
+    `Thank you for joining the list. You'll be the first to know when our ` +
+    `first pressing arrives — a single-estate, cold-extracted olive oil ` +
+    `from the Aegean coast of Turkey.\n\n` +
+    `Origin: Aegean Coast, Turkey\n` +
+    `Extraction: Single-Estate, Cold-Pressed\n` +
+    `Status: Pre-Launch\n\n` +
+    `No mass production. No shortcuts. Just one harvest, pressed with ` +
+    `care and bottled by hand.\n\n` +
+    `— The Oilive Team\n` +
+    `hello@oilive.co`
+  );
 }
 
 const WELCOME_EMAIL_TEMPLATE = `

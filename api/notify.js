@@ -161,11 +161,37 @@ const WELCOME_EMAIL_TEMPLATE = `
       </td>
     </tr><!--PLACE_ROW-->
     <tr>
-      <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:0 40px 44px;background:#ffffff;">
+      <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:0 40px 40px;background:#ffffff;">
         <p class="oilive-ink-sub" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.8;color:#1A1A1A99;margin:0;">
           Thank you for joining the list. You'll be the first to know<br>
           when our first pressing arrives &mdash; a single-estate, cold-extracted<br>
           olive oil from the Aegean coast of Turkey.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0 40px 40px;background:#ffffff;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #1A1A1A14;border-bottom:1px solid #1A1A1A14;">
+          <tr>
+            <td style="padding:18px 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:0.16em;color:#1A1A1A66;">ORIGIN</td>
+            <td align="right" style="padding:18px 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:0.02em;color:#1A1A1A;">Aegean Coast, Turkey</td>
+          </tr>
+          <tr>
+            <td style="padding:0 4px 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:0.16em;color:#1A1A1A66;border-top:1px solid #1A1A1A0F;">EXTRACTION</td>
+            <td align="right" style="padding:0 4px 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:0.02em;color:#1A1A1A;border-top:1px solid #1A1A1A0F;">Single-Estate, Cold-Pressed</td>
+          </tr>
+          <tr>
+            <td style="padding:0 4px 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:0.16em;color:#1A1A1A66;border-top:1px solid #1A1A1A0F;">STATUS</td>
+            <td align="right" style="padding:0 4px 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:0.02em;color:#556B2F;border-top:1px solid #1A1A1A0F;">Pre-Launch</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td bgcolor="#ffffff" class="oilive-card" style="text-align:center;padding:0 40px 44px;background:#ffffff;">
+        <p class="oilive-ink-sub" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;line-height:1.8;color:#1A1A1A88;margin:0;font-style:italic;">
+          No mass production. No shortcuts. Just one harvest,<br>
+          pressed with care and bottled by hand.
         </p>
       </td>
     </tr>

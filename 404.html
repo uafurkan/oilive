@@ -15,6 +15,18 @@
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
+  <script>
+    (function () {
+      try {
+        fetch("/api/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page: location.pathname, referrer: document.referrer }),
+          keepalive: true,
+        }).catch(function () {});
+      } catch (e) {}
+    })();
+  </script>
 
   <style>
     :root { --bg:#FAFAF7; --ink:#1A1A1A; --ink-65:rgba(26,26,26,0.65); --ink-40:rgba(26,26,26,0.4); --ink-08:rgba(26,26,26,0.08); --green:#556B2F; }

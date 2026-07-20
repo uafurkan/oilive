@@ -1427,7 +1427,7 @@
   /* ══════════════════════════════
      WAIT FOR LIBS
   ══════════════════════════════ */
-  var _isMobile, _basePos, _scroll, _renderer, _three, _bottle3D;
+  var _isMobile, _scroll, _renderer, _three, _bottle3D;
 
   function waitLibs() {
     if (window.THREE && window.gsap && window.ScrollTrigger) {
@@ -1466,7 +1466,6 @@
     rim.position.set(-4, -2, -3); scene.add(rim);
 
     var geo = new THREE.SphereGeometry(1, isMobile ? 40 : 72, isMobile ? 40 : 72);
-    _basePos = geo.attributes.position.array.slice();
 
     var colC = document.createElement('canvas');
     colC.width = colC.height = 256;
@@ -1502,6 +1501,40 @@
       map: colTex, bumpMap: bumpTex, bumpScale: 0.02,
       roughness: 0.32, metalness: 0.0, clearcoat: 0.85, clearcoatRoughness: 0.25
     });
+    /* The droplet's "breathing" wobble used to be computed on the CPU every
+       frame (loop over every vertex + computeVertexNormals()) — that's what
+       was tanking desktop FPS, the same class of issue the bottle module had.
+       Moving the identical displacement math into the vertex shader gives the
+       exact same look/motion but runs on the GPU instead, at effectively zero
+       CPU cost regardless of segment count. */
+    var uTime = { value: 0 };
+    mat.onBeforeCompile = function (shader) {
+      shader.uniforms.uTime = uTime;
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <common>',
+        '#include <common>\n' +
+        'uniform float uTime;\n' +
+        'float oiliveWobble(vec3 p) {\n' +
+        '  return 0.045*sin(p.x*3.1+uTime*0.8)*sin(p.y*2.3+uTime*0.6) + 0.03*sin(p.z*4.2+uTime*0.5);\n' +
+        '}\n' +
+        'vec3 oiliveDisplace(vec3 p) { return p * (1.0 + oiliveWobble(p)); }'
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <beginnormal_vertex>',
+        'vec3 oBase = position;\n' +
+        'vec3 oPos = oiliveDisplace(oBase);\n' +
+        'float oEps = 0.01;\n' +
+        'vec3 oTang = normalize(cross(oBase, abs(oBase.y) < 0.99 ? vec3(0.0,1.0,0.0) : vec3(1.0,0.0,0.0)));\n' +
+        'vec3 oBitang = normalize(cross(oBase, oTang));\n' +
+        'vec3 oPosU = oiliveDisplace(oBase + oTang*oEps);\n' +
+        'vec3 oPosV = oiliveDisplace(oBase + oBitang*oEps);\n' +
+        'vec3 objectNormal = normalize(cross(oPosU - oPos, oPosV - oPos));'
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        'vec3 transformed = oPos;'
+      );
+    };
     var drop = new THREE.Mesh(geo, mat);
     drop.scale.set(1.05, 1.35, 1.05);
     scene.add(drop);
@@ -1539,9 +1572,8 @@
 
     /* The droplet canvas sits behind the page; every section from
        Origin down has an opaque background, so the droplet is only
-       actually visible over Hero and Story. Skip the whole loop
-       (CPU vertex morph + normals + fullscreen render) once both
-       have scrolled out — this is what was tanking FPS lower down */
+       actually visible over Hero and Story. Skip the fullscreen render
+       once both have scrolled out of view. */
     var dropVisible = true;
     if (window.IntersectionObserver) {
       var visSections = { hero: true, story: true };
@@ -1555,21 +1587,12 @@
       });
     }
 
-    var v = new THREE.Vector3();
     var clock = new THREE.Clock();
     (function tick() {
       requestAnimationFrame(tick);
       if (!dropVisible) return;
       var t = clock.getElapsedTime();
-      var pos = geo.attributes.position, base = _basePos;
-      for (var i = 0; i < pos.count; i++) {
-        v.set(base[i*3], base[i*3+1], base[i*3+2]);
-        var n = 0.045*Math.sin(v.x*3.1+t*0.8)*Math.sin(v.y*2.3+t*0.6) + 0.03*Math.sin(v.z*4.2+t*0.5);
-        v.multiplyScalar(1+n);
-        pos.setXYZ(i, v.x, v.y, v.z);
-      }
-      pos.needsUpdate = true;
-      geo.computeVertexNormals();
+      uTime.value = t;
       /* The leaf stirs every so often, as if caught by a breeze:
          a slow carrier wave gated so it only registers near its peaks */
       var breeze = Math.sin(t * 0.45);

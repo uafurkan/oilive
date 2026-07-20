@@ -60,7 +60,8 @@ async function lookupGeo(ip) {
   if (!key) return null;
 
   const resp = await fetch(
-    `${GEO_API}/?key=${encodeURIComponent(key)}&ip=${encodeURIComponent(ip)}&format=json`
+    `${GEO_API}/?key=${encodeURIComponent(key)}&ip=${encodeURIComponent(ip)}&format=json`,
+    { signal: AbortSignal.timeout(4000) }
   );
   if (!resp.ok) return null;
   const data = await resp.json();
@@ -152,5 +153,6 @@ function sendTelegramMessage(token, chatId, text) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
+    signal: AbortSignal.timeout(4000),
   }).catch(() => null);
 }

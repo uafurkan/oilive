@@ -29,6 +29,12 @@
   <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 
+  <!-- Vercel Web Analytics -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+
   <style>
     /* ─── Theme tokens ─── */
     :root {
@@ -1255,7 +1261,7 @@
 
   /* ══════════════════════════════
      CUSTOM CURSOR
-  ══════════════════════════════ */
+  ════════════════════════════���═ */
   var cursor = document.getElementById('cursor');
   var cx = -100, cy = -100, tx = -100, ty = -100;
   document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
@@ -1935,8 +1941,5 @@
 
 })();
 </script>
-
-<!-- Vercel Web Analytics -->
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

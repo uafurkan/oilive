@@ -60,7 +60,7 @@ function isKnownBot(ua) {
 // in-app browser route through Meta's proxy and show up under this ISP name,
 // even though the visitor is real — filtering it would hide genuine referral
 // traffic from our own social posts.
-const HOSTING_ISP_PATTERN = /amazon|aws|google|microsoft|azure|digitalocean|linode|vultr|ovh|hetzner|cloudflare|oracle cloud|alibaba|tencent|hosting|datacenter|data center|colo(cation)?|server|advin|leaseweb|choopa|contabo|scaleway|m247|hivelocity|psychz|clouvider|hostroyale|host royale/i;
+const HOSTING_ISP_PATTERN = /amazon|aws|google|microsoft|azure|digitalocean|linode|vultr|ovh|hetzner|cloudflare|oracle cloud|alibaba|tencent|hosting|datacenter|data center|colo(cation)?|server|advin|leaseweb|choopa|contabo|scaleway|m247|hivelocity|psychz|clouvider|hostroyale|host royale|cisco|opendns/i;
 
 function isHostingOrCloudIsp(isp) {
   return typeof isp === 'string' && HOSTING_ISP_PATTERN.test(isp);

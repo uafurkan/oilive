@@ -1012,6 +1012,61 @@
 
 <script>
 (function () {
+  /* ══════════════════════════════
+     VISIT DURATION / ACTIVITY
+     Reports how long the visitor stayed and how far they got, as a
+     second Telegram notification following the entry one, once they
+     leave (tab hidden — covers backgrounding a mobile tab, which
+     'beforeunload' misses — with 'pagehide' as a fallback for cases
+     that skip straight to unload).
+  ══════════════════════════════ */
+  (function trackVisitDuration() {
+    var enterTime = Date.now();
+    var sectionOrder = ['Hero', 'Story', 'Name', 'Origin', 'Process', 'Diary', 'Field Notes', 'Product', 'Press', 'Follow', 'Notify', 'Footer'];
+    var deepestIdx = 0;
+    var maxScrollPct = 0;
+    var sent = false;
+
+    function updateScroll() {
+      var doc = document.documentElement;
+      var total = doc.scrollHeight - window.innerHeight;
+      var pct = total > 0 ? Math.round((window.scrollY / total) * 100) : 100;
+      if (pct > maxScrollPct) maxScrollPct = Math.min(100, pct);
+    }
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    updateScroll();
+
+    if (window.IntersectionObserver) {
+      sectionOrder.forEach(function (label, i) {
+        var el = document.querySelector("[data-screen-label='" + label + "']");
+        if (!el) return;
+        new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting && i > deepestIdx) deepestIdx = i;
+        }, { threshold: 0.2 }).observe(el);
+      });
+    }
+
+    function sendExit() {
+      if (sent) return;
+      sent = true;
+      var payload = JSON.stringify({
+        type: 'exit',
+        page: location.pathname,
+        durationMs: Date.now() - enterTime,
+        maxScrollPct: maxScrollPct,
+        deepestSection: sectionOrder[deepestIdx],
+      });
+      try {
+        navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }));
+      } catch (e) {}
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') sendExit();
+    });
+    window.addEventListener('pagehide', sendExit);
+  })();
+
   /* Logos are not right-clickable, draggable, or long-press-savable. */
   document.addEventListener('contextmenu', function (e) {
     if (e.target.closest('.oilive-logo-protect')) e.preventDefault();

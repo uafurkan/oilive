@@ -27,13 +27,21 @@ export default async function handler(req, res) {
     const host = req.headers.host || req.headers[':authority'] || '';
     const page = typeof req.body?.page === 'string' ? req.body.page : '/';
     const referrer = typeof req.body?.referrer === 'string' ? req.body.referrer : '';
+    const isExit = req.body?.type === 'exit';
 
     if (isKnownBot(ua)) return;
 
     const geo = await lookupGeo(ip);
     if (isHostingOrCloudIsp(geo?.isp)) return;
 
-    const message = buildMessage({ ip, ua, host, page, referrer, geo });
+    const message = isExit
+      ? buildExitMessage({
+          ip, host, geo,
+          durationMs: Number(req.body?.durationMs) || 0,
+          maxScrollPct: Number(req.body?.maxScrollPct) || 0,
+          deepestSection: typeof req.body?.deepestSection === 'string' ? req.body.deepestSection : '',
+        })
+      : buildMessage({ ip, ua, host, page, referrer, geo });
     // Awaited (not fire-and-forget): Vercel's serverless runtime can freeze
     // the function the instant a response is sent, killing any request
     // still in flight — so the Telegram send must finish before we respond.
@@ -120,6 +128,33 @@ function buildMessage({ ip, ua, host, page, referrer, geo }) {
     mapLine +
     (ip ? `\n${ip}` : '')
   );
+}
+
+function buildExitMessage({ ip, host, geo, durationMs, maxScrollPct, deepestSection }) {
+  const flag = geo?.countryCode ? countryFlag(geo.countryCode) : '🌍';
+  const location = geo
+    ? `${flag} ${[geo.city, geo.regionName, geo.country].filter(Boolean).join(', ')}`
+    : `${flag} Unknown location`;
+  const timestamp = formatIstanbulTime(new Date());
+  const domainLine = host ? `\n🌍 Domain: ${host}` : '';
+
+  return (
+    `🚪 ${BOT_NAME} Çıkış\n\n` +
+    `📍 ${location}\n` +
+    `⏱ Süre: ${formatDuration(durationMs)}\n` +
+    `📊 Scroll: %${maxScrollPct}\n` +
+    (deepestSection ? `📌 En derin bölüm: ${deepestSection}\n` : '') +
+    domainLine +
+    `\n⏰ ${timestamp}` +
+    (ip ? `\n${ip}` : '')
+  );
+}
+
+function formatDuration(ms) {
+  const totalSec = Math.round(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return min > 0 ? `${min}dk ${sec}sn` : `${sec}sn`;
 }
 
 function countryFlag(countryCode) {

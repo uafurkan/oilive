@@ -173,7 +173,9 @@ function parseDevice(ua) {
   else if (/linux/i.test(ua)) os = 'Linux';
 
   let browser = 'Unknown browser';
-  if (/edg\//i.test(ua)) browser = 'Edge';
+  if (/instagram/i.test(ua)) browser = 'Instagram App';
+  else if (/\bfban\/|\bfbav\/|fb_iab/i.test(ua)) browser = 'Facebook App';
+  else if (/edg\//i.test(ua)) browser = 'Edge';
   else if (/chrome\//i.test(ua)) browser = 'Chrome';
   else if (/safari\//i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari';
   else if (/firefox\//i.test(ua)) browser = 'Firefox';

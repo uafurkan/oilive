@@ -106,13 +106,7 @@ function buildMessage({ ip, ua, host, page, referrer, geo }) {
   const mapLine = geo?.lat && geo?.lon
     ? `\n🗺 Haritada gör (https://maps.google.com/?q=${geo.lat},${geo.lon})`
     : '';
-  // Only called out when it's not the main custom domain — most visits come
-  // through oilive.co and don't need a line stating the obvious, but a hit
-  // on the raw *.vercel.app deployment URL (a link shared straight from
-  // Vercel rather than oilive.co) is worth flagging.
-  const domainLine = host && !/(^|\.)oilive\.co$/i.test(host)
-    ? `\n🌐 Domain: ${host}`
-    : '';
+  const domainLine = host ? `\n🌍 Domain: ${host}` : '';
 
   return (
     `👁 ${BOT_NAME} Ziyareti\n\n` +

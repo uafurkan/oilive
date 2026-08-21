@@ -109,7 +109,8 @@ function buildMessage({ ip, ua, host, page, referrer, geo }) {
     : `${flag} Unknown location`;
   const network = geo?.isp || geo?.org || 'Unknown network';
   const device = parseDevice(ua);
-  const source = referrer ? shortenUrl(referrer) : 'Direkt / URL';
+  const utm = parseUtmSource(page);
+  const source = (referrer ? shortenUrl(referrer) : 'Direkt / URL') + (utm ? ` (utm: ${utm})` : '');
   const timestamp = formatIstanbulTime(new Date());
   const mapLine = geo?.lat && geo?.lon
     ? `\n🗺 Haritada gör (https://maps.google.com/?q=${geo.lat},${geo.lon})`
@@ -181,6 +182,20 @@ function parseDevice(ua) {
   else if (/firefox\//i.test(ua)) browser = 'Firefox';
 
   return `${browser}/${os}`;
+}
+
+function parseUtmSource(page) {
+  try {
+    const query = page.split('?')[1];
+    if (!query) return '';
+    const params = new URLSearchParams(query);
+    const source = params.get('utm_source');
+    const medium = params.get('utm_medium');
+    if (!source) return '';
+    return medium ? `${source}/${medium}` : source;
+  } catch {
+    return '';
+  }
 }
 
 function shortenUrl(url) {

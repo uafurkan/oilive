@@ -24,7 +24,6 @@ export default async function handler(req, res) {
 
     const ip = getClientIp(req);
     const ua = req.headers['user-agent'] || '';
-    const host = req.headers.host || req.headers[':authority'] || '';
     const page = typeof req.body?.page === 'string' ? req.body.page : '/';
     const referrer = typeof req.body?.referrer === 'string' ? req.body.referrer : '';
 
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
     const geo = await lookupGeo(ip);
     if (isHostingOrCloudIsp(geo?.isp)) return;
 
-    const message = buildMessage({ ip, ua, host, page, referrer, geo });
+    const message = buildMessage({ ip, ua, page, referrer, geo });
     // Awaited (not fire-and-forget): Vercel's serverless runtime can freeze
     // the function the instant a response is sent, killing any request
     // still in flight — so the Telegram send must finish before we respond.
@@ -94,7 +93,7 @@ async function lookupGeo(ip) {
   };
 }
 
-function buildMessage({ ip, ua, host, page, referrer, geo }) {
+function buildMessage({ ip, ua, page, referrer, geo }) {
   const flag = geo?.countryCode ? countryFlag(geo.countryCode) : '🌍';
   const location = geo
     ? `${flag} ${[geo.city, geo.regionName, geo.country].filter(Boolean).join(', ')}`
@@ -106,13 +105,6 @@ function buildMessage({ ip, ua, host, page, referrer, geo }) {
   const mapLine = geo?.lat && geo?.lon
     ? `\n🗺 Haritada gör (https://maps.google.com/?q=${geo.lat},${geo.lon})`
     : '';
-  // Only called out when it's not the main custom domain — most visits come
-  // through oilive.co and don't need a line stating the obvious, but a hit
-  // on the raw *.vercel.app deployment URL (a link shared straight from
-  // Vercel rather than oilive.co) is worth flagging.
-  const domainLine = host && !/(^|\.)oilive\.co$/i.test(host)
-    ? `\n🌐 Domain: ${host}`
-    : '';
 
   return (
     `👁 ${BOT_NAME} Ziyareti\n\n` +
@@ -120,9 +112,8 @@ function buildMessage({ ip, ua, host, page, referrer, geo }) {
     `🌐 ${network}\n` +
     `📱 ${device}\n` +
     `🔗 ${source}\n` +
-    `📄 ${page}` +
-    domainLine +
-    `\n⏰ ${timestamp}` +
+    `📄 ${page}\n` +
+    `⏰ ${timestamp}` +
     mapLine +
     (ip ? `\n${ip}` : '')
   );
